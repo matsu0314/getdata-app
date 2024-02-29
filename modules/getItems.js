@@ -5,22 +5,36 @@ const fs = require("fs");
 const client = require("cheerio-httpcli");
 const zipFiles = require("./zipFiles");
 const csvWrite = require("./csv_shifJis");
+const deleteDirectoryWithAllContents = require("./deleteDirectory");
 const sleep = require("./sleep");
 
 module.exports = async (inputItemcodes, res) => {
-  // キャッシュクリア
-  console.log("キャッシュクリア")
-  delete require.cache[require.resolve("./zipFiles")];
-  delete require.cache[require.resolve("./csv_shifJis")];
-  client.download.clearCache();
-
   // 現在時刻（タイムタンプ）を取得
   const dateNowString = Date.now();
+  // 24時間のミリ秒数
+  const millisecondsIn24Hours = 86400000; 
   // 出力結果を格納（初期値）
   let resultItemAry = [];
   // カウント用変数
   let imgCount = 0;
   let errorCount = 0;
+
+  // キャッシュクリア
+  console.log("キャッシュクリア");
+  delete require.cache[require.resolve("./zipFiles")];
+  delete require.cache[require.resolve("./csv_shifJis")];
+  client.download.clearCache();
+
+  // 過去24時間前のダウンロードファイル削除
+  console.log("過去24時間前のダウンロードファイル削除");
+  const files = fs.readdirSync(path.join(__dirname, "../static/result/"));
+  console.log("resultディレクトに残っているファイル", files);
+  files.map((fileName) => {
+    if(Number(dateNowString) - millisecondsIn24Hours > fileName ) {
+      const filePath = path.join(__dirname, "../static/result/", fileName);
+      deleteDirectoryWithAllContents(filePath)
+    }
+  })
 
   // スクレイピングするアイテム
   const itemURLAll = await inputItemcodes.trim().replace(/,$/g,"").split(",");
