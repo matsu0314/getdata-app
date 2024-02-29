@@ -1,0 +1,72 @@
+<form id="form_get_thumbnail" action="/" method="POST">
+  <textarea
+    id="inputItemcodes"
+    name="inputItemcodes"
+    rows="10"
+    class="block text-lg p-2.5 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+    placeholder="react-axios,mw-wp-form-validate,react-createportal,php-version-up,excel-mass-item"
+  ></textarea>
+  <button
+    class="flex w-full md:w-1/2 mt-5 block mx-auto justify-center bg-green-600 rounded-full px-10 py-5 text-lg font-semibold leading-6 text-white hover:opacity-75 focus:outline-none"
+    type="submit"
+  >
+    サムネイルを取得
+  </button>
+</form>
+
+<script>
+  document
+    .querySelector('button[type="submit"]')
+    .addEventListener("click", (e) => {
+      e.preventDefault();
+      const form_get_thumbnail = document.getElementById("form_get_thumbnail");
+      const inputItemcodes = form_get_thumbnail.inputItemcodes.value;
+      const arrayItemcode = inputItemcodes.trim().split(",");
+      const arrayDuplicate = arrayItemcode.filter(function (x, i, self) {
+        return self.indexOf(x) !== self.lastIndexOf(x);
+      });
+
+      if (inputItemcodes === "") {
+        alert("コードを入力してください。");
+      } else if (inputItemcodes.match(/(,)\1+/g)) {
+        alert(
+          "コードの区切り文字,（カンマ）が連続で記述されている箇所があります。除外して実行してください。"
+        );
+      } else if (arrayDuplicate.length) {
+        const duplicateItems = Array.from(new Set(arrayDuplicate));
+        console.log(duplicateItems);
+        alert(
+          `重複コードが${
+            duplicateItems.length
+          }個あります。除外して実行してください。\n重複文字：${duplicateItems.join()}`
+        );
+      } else {
+        // データ送信
+        form_get_thumbnail.submit();
+
+        //　ローディング表示
+        const divElm = document.createElement("div");
+        const pElm = document.createElement("p");
+        const txtElm = document.createElement("p");
+        const brElm = document.createElement("br");
+        // const pTxt1 = document.createTextNode("データを取得しています。");
+        // const pTxt2 = document.createTextNode("しばらくお待ちください");
+
+        divElm.classList.add("cover");
+        pElm.classList.add("loader");
+        txtElm.classList.add("loader-txt");
+        document.querySelector("body").classList.add("loading");
+        document.querySelector("body").appendChild(divElm);
+        document.querySelector("body").appendChild(pElm);
+        document.querySelector("body").appendChild(txtElm);
+        txtElm.appendChild(pTxt1);
+        txtElm.appendChild(brElm);
+        txtElm.appendChild(pTxt2);
+
+        const resultArea = document.querySelector(".result-area");
+        if (resultArea !== null) {
+          resultArea.remove();
+        }
+      }
+    });
+</script>

@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+2:wght@100..900&display=swap');
+
+@tailwind base;
+
+@layer base {
+  html {
+    @apply text-[#4f4f4f];
+  }
+
+  html.dark {
+    @apply text-neutral-50;
+    @apply bg-neutral-800;
+  }
+}
+
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+  font-family: "M PLUS 2", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+main a {
+  color: #8ab4f8;
+  text-decoration: underline;
+}
+
+main a:hover {
+  text-decoration: none;
+}
+
+main tr.error-true {
+  background:#ffe8e8;
+}

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <%- include("./head", {title: "トップ"}); %>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+  </head>
+  <body class="flex flex-col">
+    <%- include("./header") %>
+    <main class="container mx-auto p-1 md:p-1">
+      <div>
+        <p>サムネイルと登録用CSVを取得します。取得するアイテムコードを入力してください。</p>
+        <div class="form-area mt-4"><%- include("./form", {inputItemcodes: ""}) %></div>
+      </div>
+    </main>
+    <%- include("./footer") %>
+  </body>
+</html>

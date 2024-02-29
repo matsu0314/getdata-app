@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <%- include("./head", {title: "エラー"}); %>
+  </head>
+  <body class="flex flex-col">
+    <%- include("./header") %>
+    <main class="container mx-auto p-1 md:p-1">
+      <div>
+      <p>エラーメッセージ</p>
+      <p class="message"><%= message %></p>
+    </div>
+  </main>
+  <%- include("./footer") %>
+</body>
+</html>

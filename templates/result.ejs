@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <%- include("./head", {title: "取得結果"}); %>
+  </head>
+  <body class="flex flex-col">
+    <%- include("./header") %>
+    <main class="container mx-auto p-1 md:p-1">
+      <div>
+      <p class="py-5 text-lg font-medium">取得商品は<%= itemLength %>件です。成功<%= imgCount %>件、失敗<%= errorCount %>件です。</p>
+      <p class="flex items-center">zipファイルダウンロード<a href="/static/result/<%= dateNowString %>/goods.zip"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#8795b0" d="M2 6a2 2 0 0 1 2-2h5a1 1 0 0 1 .707.293L11.414 6H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm6.586 0H4v12h16V8h-9a1 1 0 0 1-.707-.293zM12 9.5a1 1 0 0 1 1 1v2.586l.293-.293a1 1 0 0 1 1.414 1.414l-2 2a1 1 0 0 1-1.414 0l-2-2a1 1 0 1 1 1.414-1.414l.293.293V10.5a1 1 0 0 1 1-1"/></svg></a></p>
+      <p class="flex items-center">goods_img.csvファイルダウンロード<a href="/static/result/<%= dateNowString %>/goods_img.csv"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#8795b0" d="M4 4a2 2 0 0 1 2-2h8a1 1 0 0 1 .707.293l5 5A1 1 0 0 1 20 8v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm13.586 4L14 4.414V8zM12 4H6v16h12V10h-5a1 1 0 0 1-1-1zm0 7.5a1 1 0 0 1 1 1v2.586l.293-.293a1 1 0 0 1 1.414 1.414l-2 2a1 1 0 0 1-1.414 0l-2-2a1 1 0 1 1 1.414-1.414l.293.293V12.5a1 1 0 0 1 1-1"/></svg></a></p>
+      <p class="mt-5 text-sm text-gray-500 text-right">※表示はデータ取得順になります。</p>
+      <table class="w-full border-collapse border border-slate-400">
+        <thead>
+          <tr>
+            <th class="border border-slate-300 dark:border-slate-600 font-semibold p-2 text-slate-900 dark:text-slate-200 text-left">Index</th>
+            <th class="border border-slate-300 dark:border-slate-600 font-semibold p-2 text-slate-900 dark:text-slate-200 text-left">ATT_GRP_ID</th>
+            <th class="w-1/2 border border-slate-300 dark:border-slate-600 font-semibold p-2 text-slate-900 dark:text-slate-200 text-left">itemName</th>
+            <th class="border border-slate-300 dark:border-slate-600 font-semibold p-2 text-slate-900 dark:text-slate-200 text-left">item.itemCode</th>
+            <th class="border border-slate-300 dark:border-slate-600 font-semibold p-2 text-slate-900 dark:text-slate-200 text-left">item.fileName</th>
+            <th class="border border-slate-300 dark:border-slate-600 font-semibold p-2 text-slate-900 dark:text-slate-200 text-left">url</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% resultItemAry.forEach((item, i) => { %>
+            <tr class="error-<%= item.isError %>">
+              <td class="border border-slate-300 dark:border-slate-700 p-2 text-slate-500 dark:text-slate-400"><%= i + 1 %></td>
+              <td class="border border-slate-300 dark:border-slate-700 p-2 text-slate-500 dark:text-slate-400"><%= item.ATT_GRP_ID %></td>
+              <td class="border border-slate-300 dark:border-slate-700 p-2 text-slate-500 dark:text-slate-400"><%= item.itemName %></td>
+              <td class="border border-slate-300 dark:border-slate-700 p-2 text-slate-500 dark:text-slate-400"><%= item.itemCode %></td>
+              <td class="border border-slate-300 dark:border-slate-700 p-2 text-slate-500 dark:text-slate-400"><%= item.fileName %></td>
+              <td class="border border-slate-300 dark:border-slate-700 p-2 text-slate-500 dark:text-slate-400"><a href="<%= item.url %>" target="_blank"><%= item.url %></a></td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+  </div>
+  <p class="mt-4 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#b0b0b0" d="M21 12a9 9 0 1 0-18 0a9 9 0 0 0 18 0M12 1c6.075 0 11 4.925 11 11s-4.925 11-11 11S1 18.075 1 12S5.925 1 12 1m5.5 12H9.914l3 3l-1.414 1.414L6.086 12L11.5 6.586L12.914 8l-3 3H17.5z"/></svg><span class="ml-1"><a href="/">戻る</span></a></p>
+</main>
+<%- include("./footer") %>
+</body>
+</html>
