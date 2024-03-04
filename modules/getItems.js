@@ -27,14 +27,15 @@ module.exports = async (inputItemcodes, res) => {
 
   // 過去24時間前のダウンロードファイル削除
   console.log("過去24時間前のダウンロードファイル削除");
-  const files = fs.readdirSync(path.join(__dirname, "../static/result/"));
-  console.log("resultディレクトに残っているファイル", files);
-  files.map((fileName) => {
-    if(Number(dateNowString) - millisecondsIn24Hours > fileName ) {
-      const filePath = path.join(__dirname, "../static/result/", fileName);
-      deleteDirectoryWithAllContents(filePath)
-    }
-  })
+  fs.readdir(path.join(__dirname, "../static/result/"), (e, files) => {
+    console.log("resultディレクトに残っているファイル", files);
+    files.map((fileName) => {
+      if(Number(dateNowString) - millisecondsIn24Hours > fileName ) {
+        const filePath = path.join(__dirname, "../static/result/", fileName);
+        deleteDirectoryWithAllContents(filePath)
+      }
+    })
+  });
 
   // スクレイピングするアイテム
   const itemURLAll = await inputItemcodes.trim().replace(/,$/g,"").split(",");
@@ -42,25 +43,18 @@ module.exports = async (inputItemcodes, res) => {
   const baseURL = "https://m-kenomemo.com/";
 
   // タイムスタンプのディレクトリを作成
-  fs.mkdirSync(
+  await fs.promises.mkdir(
     path.join(__dirname, "../", "static", `/result/${dateNowString}/goods/S`),
     { recursive: true },
-    (err) => {
-      if (err) {
-        throw err;
-      }
-      console.log("ディレクトリが作成されました");
-    }
   );
+  console.log("ディレクトリが作成されました");
+
   // 雛形CSVをコピーする
-  fs.copyFile(
+  await fs.promises.copyFile(
     path.join(__dirname, "../", `goods_img.csv`),
     path.join(__dirname, "../", `static`, `/result/${dateNowString}/goods_img.csv`),
-    (err) => {
-      if (err) throw err;
-      console.log("ファイルをコピーしました");
-    }
   );
+  console.log("ファイルをコピーしました");
 
   // CSVのディレクトリパス
   const csvPath = path.join(
