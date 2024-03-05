@@ -155,9 +155,7 @@ module.exports = async (inputItemcodes, res) => {
     console.log("すべてのアイテム取得完了")
 
     // CSVファイルに書き込み
-    await Promise.all(resultItemAry.map(async (resultObj) => {
-      await csvWrite(csvPath, resultObj);
-    }));
+    await csvWrite(csvPath, resultItemAry);
 
     // 結果ページに遷移
     res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
