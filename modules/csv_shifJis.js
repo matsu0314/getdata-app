@@ -26,7 +26,7 @@ const resultAry = [
       try {
         const _csv_data = await data_to_csv(data);
         // CSVファイルにデータを追記
-        fs.writeFile(path, { flag: 'a' }, iconv.encode(_csv_data, 'shift_jis'), err => {
+        fs.writeFile(path, iconv.encode(_csv_data, 'shift_jis'), {flag: "a+"},  err => {
           if (err) {
             console.log('エラーが発生しました。' + err);
             resutItem.errMessage.push(err);
