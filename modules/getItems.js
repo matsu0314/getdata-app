@@ -163,7 +163,10 @@ module.exports = async (inputItemcodes, res) => {
 
   let exec = async () => {
     await getInfoData();
-    if (resultItemAry.length === 0) {
+    if (resultItemAry.length > 0) {
+      // 結果ページに遷移
+      res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
+    } else {
       // アイテムが取得できない場合、エラーページへ
       res.render('errorpage', { message: '取得できるデータが１件もありませんでした。' });
     }
@@ -215,8 +218,6 @@ module.exports = async (inputItemcodes, res) => {
       console.log("ダウンロードが完了しました");
       // すべての画像のダウンロードが完了したらzip処理を実行する
       await zipFiles(dateNowString);
-      // 結果ページに遷移
-      res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
     })
 
   // ④並列ダウンロード制限の設定
