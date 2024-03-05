@@ -171,7 +171,11 @@ module.exports = async (inputItemcodes, res) => {
     }
   };
 
-  exec();
+  // データ取得を開始
+  (async () => {
+    await exec();
+  })();
+
 
   // ダウンロードマネージャー
   client.download
@@ -222,6 +226,4 @@ module.exports = async (inputItemcodes, res) => {
 
   // ④並列ダウンロード制限の設定
   client.download.parallel = 4;
-
-
 };
