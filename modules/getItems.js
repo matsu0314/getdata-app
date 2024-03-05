@@ -12,7 +12,7 @@ module.exports = async (inputItemcodes, res) => {
   // 現在時刻（タイムタンプ）を取得
   const dateNowString = Date.now();
   // 24時間のミリ秒数
-  const millisecondsIn24Hours = 86400000; 
+  const millisecondsIn24Hours = 86400000;
   // 出力結果を格納（初期値）
   let resultItemAry = [];
   // カウント用変数
@@ -30,7 +30,7 @@ module.exports = async (inputItemcodes, res) => {
   fs.readdir(path.join(__dirname, "../static/result/"), (e, files) => {
     console.log("resultディレクトに残っているファイル", files);
     files.map((fileName) => {
-      if(Number(dateNowString) - millisecondsIn24Hours > fileName ) {
+      if (Number(dateNowString) - millisecondsIn24Hours > fileName) {
         const filePath = path.join(__dirname, "../static/result/", fileName);
         deleteDirectoryWithAllContents(filePath)
       }
@@ -38,7 +38,7 @@ module.exports = async (inputItemcodes, res) => {
   });
 
   // スクレイピングするアイテム
-  const itemURLAll = await inputItemcodes.trim().replace(/,$/g,"").split(",");
+  const itemURLAll = await inputItemcodes.trim().replace(/,$/g, "").split(",");
   const itemLength = itemURLAll.length;
   const baseURL = "https://m-kenomemo.com/";
 
@@ -76,68 +76,68 @@ module.exports = async (inputItemcodes, res) => {
           isError: false,
         };
 
-        await client
-          .fetch(`${baseURL}${itemURL}/`)
-          .then(async (result) => {
-            const { $ } = result;
-            const pageTitle = $("title").text();
-            const targetThumb = $(".eye-catch img"); 
+        const result = await client.fetch(`${baseURL}${itemURL}/`);
+        const { $ } = result;
 
-            resutItem.ATT_GRP_ID = itemURL;
-            resutItem.url = `${baseURL}${itemURL}/`;
+        try {
+          const pageTitle = $("title").text();
+          const targetThumb = $(".eye-catch img");
 
-            // サムネイルをダウンロードマネージャーに登録
-            targetThumb.first().download();
+          resutItem.ATT_GRP_ID = itemURL;
+          resutItem.url = `${baseURL}${itemURL}/`;
 
-            try {
-              // サムネイル画像が見つからない場合
-              if (targetThumb.first().length === 0) {
-                resutItem.itemName = "Error!";
-                resutItem.itemCode = "Error!";
-                resutItem.fileName = "Error!";
-                throw new Error(
-                  "ページが存在しない、もしくはサムネイル画像の掲載がないページです。"
-                );
-              }
+          // サムネイルをダウンロードマネージャーに登録
+          targetThumb.first().download();
 
-              const pathList = targetThumb
-                .first()
-                .attr("src")
-                .split("/");
-              const itemName = pageTitle.trim().split("|")[0];
-              const itemCode = $('[id^="post-"]').first().attr("id").replace("post-","");
-              const fileName = pathList[pathList.length - 1];
-
-              console.log(itemCode);
-
-              // 商品情報取得
-              resutItem.itemName = itemName;
-              resutItem.itemCode = itemCode;
-              resutItem.fileName = fileName;
-
-              // CSVファイルに書き込み
-              const resultObj = { itemCode, fileName };
-              await csvWrite(csvPath, resultObj);
-
-              // スクレイピング結果を追加
-              resultItemAry.push(resutItem);
-
-            } catch (err) {
-              console.log(err, "HTMLパースできませんでした。");
-              resutItem.isError = true;
-              resultItemAry.push(resutItem);
+          try {
+            // サムネイル画像が見つからない場合
+            if (targetThumb.first().length === 0) {
+              resutItem.itemName = "Error!";
+              resutItem.itemCode = "Error!";
+              resutItem.fileName = "Error!";
+              throw new Error(
+                "ページが存在しない、もしくはサムネイル画像の掲載がないページです。"
+              );
             }
-          })
-          .catch(function (err) {
-            console.log(err, "fetchに失敗しました。");
-            resutItem.ATT_GRP_ID = itemURL;
-            resutItem.itemName = "Error!";
-            resutItem.itemCode = "Error!";
-            resutItem.fileName = "Error!";
-            resutItem.url = `${baseURL}/${itemURL}/`;
+
+            const pathList = targetThumb
+              .first()
+              .attr("src")
+              .split("/");
+            const itemName = pageTitle.trim().split("|")[0];
+            const itemCode = $('[id^="post-"]').first().attr("id").replace("post-", "");
+            const fileName = pathList[pathList.length - 1];
+
+            console.log(itemCode);
+
+            // 商品情報取得
+            resutItem.itemName = itemName;
+            resutItem.itemCode = itemCode;
+            resutItem.fileName = fileName;
+
+            // CSVファイルに書き込み
+            const resultObj = { itemCode, fileName };
+            await csvWrite(csvPath, resultObj);
+
+            // スクレイピング結果を追加
+            resultItemAry.push(resutItem);
+
+          } catch (err) {
+            console.log(err, "HTMLパースできませんでした。");
             resutItem.isError = true;
             resultItemAry.push(resutItem);
-          });
+          }
+
+        } catch (err) {
+          console.log(err, "fetchに失敗しました。");
+          resutItem.ATT_GRP_ID = itemURL;
+          resutItem.itemName = "Error!";
+          resutItem.itemCode = "Error!";
+          resutItem.fileName = "Error!";
+          resutItem.url = `${baseURL}/${itemURL}/`;
+          resutItem.isError = true;
+          resultItemAry.push(resutItem);
+        };
 
         if (resutItem.isError) {
           errorCount++;
@@ -148,7 +148,7 @@ module.exports = async (inputItemcodes, res) => {
 
       })
     );
-    console.log("finish", client.download.state); 
+    console.log("finish", client.download.state);
     console.log("すべてのアイテム取得完了")
 
     // 結果ページに遷移
@@ -210,5 +210,5 @@ module.exports = async (inputItemcodes, res) => {
   // ④並列ダウンロード制限の設定
   client.download.parallel = 4;
 
- 
+
 };
