@@ -155,7 +155,7 @@ module.exports = async (inputItemcodes, res) => {
     console.log("すべてのアイテム取得完了")
 
     // CSVファイルに書き込み
-    await Promise.all(resultItemAry.map(async (resultObj)=>{
+    await Promise.all(resultItemAry.map(async (resultObj) => {
       await csvWrite(csvPath, resultObj);
     }));
 
@@ -175,9 +175,14 @@ module.exports = async (inputItemcodes, res) => {
 
   // ダウンロードマネージャー
   client.download
-    .on("ready", function (stream) {
-      let pathList = stream.url.href.split("/");
-      let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
+    .on("ready", async function (stream) {
+      // URL取得をpromiseで待つ
+      let pathPromiseList = new Promise((resolve) => {
+        resolve(stream.url.href.split("/"));
+      })
+      // 取得したURLの最後のディレクトリを取得
+      let pathList = await pathPromiseList;
+      let fileName = await pathList[pathList.length - 1].replace(/\?.*/, "");
 
       console.log("ready", this.state)
 
