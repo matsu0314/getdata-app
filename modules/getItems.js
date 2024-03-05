@@ -80,10 +80,10 @@ module.exports = async (inputItemcodes, res) => {
           isError: false,
         };
 
-        const result = await client.fetch(`${baseURL}${itemURL}/`);
-        const { $ } = result;
-
         try {
+          const result = await client.fetch(`${baseURL}${itemURL}/`);
+          const { $ } = result;
+          
           const pageTitle = $("title").text();
           const targetThumb = $(".eye-catch img");
 
