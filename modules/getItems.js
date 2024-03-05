@@ -13,8 +13,10 @@ module.exports = async (inputItemcodes, res) => {
   const dateNowString = Date.now();
   // 24時間のミリ秒数
   const millisecondsIn24Hours = 86400000;
-  // 出力結果を格納（初期値）
+  // 全てのアイテム出力結果を格納（初期値）
   let resultItemAry = [];
+  // １アイテム出力結果を格納（初期値）
+  let resultObj = {};
   // カウント用変数
   let imgCount = 0;
   let errorCount = 0;
@@ -67,7 +69,9 @@ module.exports = async (inputItemcodes, res) => {
   const getInfoData = async () => {
     await Promise.all(
       itemURLAll.map(async (itemURL) => {
-        var resutItem = {
+        // 初期化
+        resultObj = {};
+        let resutItem = {
           ATT_GRP_ID: "",
           itemName: "",
           itemCode: "",
@@ -115,11 +119,9 @@ module.exports = async (inputItemcodes, res) => {
             resutItem.itemCode = itemCode;
             resutItem.fileName = fileName;
 
-            // CSVファイルに書き込み
-            const resultObj = { itemCode, fileName };
-            await csvWrite(csvPath, resultObj);
-
-            // スクレイピング結果を追加
+            // 取得情報をオブジェクトに格納
+            resultObj = { itemCode, fileName };
+            // 取得情報を配列に追加
             resultItemAry.push(resutItem);
 
           } catch (err) {
@@ -148,8 +150,14 @@ module.exports = async (inputItemcodes, res) => {
 
       })
     );
+
     console.log("finish", client.download.state);
     console.log("すべてのアイテム取得完了")
+
+    // CSVファイルに書き込み
+    await Promise.all(resultItemAry.map(async (resultObj)=>{
+      await csvWrite(csvPath, resultObj);
+    }));
 
     // 結果ページに遷移
     res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
