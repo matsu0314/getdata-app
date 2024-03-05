@@ -163,9 +163,9 @@ module.exports = async (inputItemcodes, res) => {
 
   let exec = async () => {
     await getInfoData();
-    // アイテムが取得できない場合、エラーページへ
     if (resultItemAry.length === 0) {
-      res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
+      // アイテムが取得できない場合、エラーページへ
+      res.render('errorpage', { message: '取得できるデータが１件もありませんでした。' });
     }
   };
 
@@ -178,13 +178,8 @@ module.exports = async (inputItemcodes, res) => {
   // ダウンロードマネージャー
   client.download
     .on("ready", async function (stream) {
-      // URL取得をpromiseで待つ
-      let pathPromiseList = new Promise((resolve) => {
-        resolve(stream.url.href.split("/"));
-      })
-      // 取得したURLの最後のディレクトリを取得
-      let pathList = await pathPromiseList;
-      let fileName = await pathList[pathList.length - 1].replace(/\?.*/, "");
+      let pathList = stream.url.href.split("/");
+      let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
 
       console.log("ready", this.state)
 
@@ -220,6 +215,8 @@ module.exports = async (inputItemcodes, res) => {
       console.log("ダウンロードが完了しました");
       // すべての画像のダウンロードが完了したらzip処理を実行する
       await zipFiles(dateNowString);
+      // 結果ページに遷移
+      res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
     })
 
   // ④並列ダウンロード制限の設定
