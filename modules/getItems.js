@@ -66,6 +66,51 @@ module.exports = async (inputItemcodes, res) => {
     `/result/${dateNowString}/goods_img.csv`
   );
 
+  // ダウンロードマネージャー
+  client.download
+    .on("ready", async function (stream) {
+      let pathList = stream.url.href.split("/");
+      let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
+
+      console.log("ready", this.state)
+
+      // 保存先ファイルのストリーム作成
+      let write = fs.createWriteStream(
+        path.join(
+          __dirname,
+          "../",
+          "static",
+          `/result/${dateNowString}/goods/S/${fileName}`
+        )
+      );
+      write
+        .on("finish", function () {
+          console.log(stream.url.href + "をダウンロードしました");
+
+          imgCount++;
+        })
+        .on("error", console.error);
+      // ダウンロードストリームからデータを読み込んでファイルストリームに書き込む
+      stream
+        .on("data", function (chunk) {
+          write.write(chunk);
+        })
+        .on("end", function () {
+          write.end();
+        });
+    })
+    .on("error", function (err) {
+      console.error(err.url + "をダウンロードできませんでした: " + err.message);
+    })
+    .on("end", async function () {
+      console.log("ダウンロードが完了しました");
+      // すべての画像のダウンロードが完了したらzip処理を実行する
+      await zipFiles(dateNowString);
+    })
+
+  // ④並列ダウンロード制限の設定
+  client.download.parallel = 4;
+
   const getInfoData = async () => {
     await Promise.all(
       itemURLAll.map(async (itemURL) => {
@@ -157,8 +202,6 @@ module.exports = async (inputItemcodes, res) => {
     // CSVファイルに書き込み
     await csvWrite(csvPath, resultItemAry);
 
-    // 結果ページに遷移
-    res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
   };
 
   let exec = async () => {
@@ -173,53 +216,5 @@ module.exports = async (inputItemcodes, res) => {
   };
 
   // データ取得を開始
-  (async () => {
-    await exec();
-  })();
-
-
-  // ダウンロードマネージャー
-  client.download
-    .on("ready", async function (stream) {
-      let pathList = stream.url.href.split("/");
-      let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
-
-      console.log("ready", this.state)
-
-      // 保存先ファイルのストリーム作成
-      let write = fs.createWriteStream(
-        path.join(
-          __dirname,
-          "../",
-          "static",
-          `/result/${dateNowString}/goods/S/${fileName}`
-        )
-      );
-      write
-        .on("finish", function () {
-          console.log(stream.url.href + "をダウンロードしました");
-
-          imgCount++;
-        })
-        .on("error", console.error);
-      // ダウンロードストリームからデータを読み込んでファイルストリームに書き込む
-      stream
-        .on("data", function (chunk) {
-          write.write(chunk);
-        })
-        .on("end", function () {
-          write.end();
-        });
-    })
-    .on("error", function (err) {
-      console.error(err.url + "をダウンロードできませんでした: " + err.message);
-    })
-    .on("end", async function () {
-      console.log("ダウンロードが完了しました");
-      // すべての画像のダウンロードが完了したらzip処理を実行する
-      await zipFiles(dateNowString);
-    })
-
-  // ④並列ダウンロード制限の設定
-  client.download.parallel = 4;
+  await exec();
 };
