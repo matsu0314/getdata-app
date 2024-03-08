@@ -15,8 +15,6 @@ module.exports = async (inputItemcodes, res) => {
   const millisecondsIn24Hours = 86400000;
   // 全てのアイテム出力結果を格納（初期値）
   let resultItemAry = [];
-  // １アイテム出力結果を格納（初期値）
-  let resultObj = {};
   // カウント用変数
   let imgCount = 0;
   let errorCount = 0;
@@ -115,7 +113,6 @@ module.exports = async (inputItemcodes, res) => {
     await Promise.all(
       itemURLAll.map(async (itemURL) => {
         // 初期化
-        resultObj = {};
         let resutItem = {
           ATT_GRP_ID: "",
           itemName: "",
@@ -164,8 +161,6 @@ module.exports = async (inputItemcodes, res) => {
             resutItem.itemCode = itemCode;
             resutItem.fileName = fileName;
 
-            // 取得情報をオブジェクトに格納
-            resultObj = { itemCode, fileName };
             // 取得情報を配列に追加
             resultItemAry.push(resutItem);
 
