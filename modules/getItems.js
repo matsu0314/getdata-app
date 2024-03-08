@@ -32,9 +32,9 @@ module.exports = async (inputItemcodes, res) => {
     files.map((fileName) => {
       if (Number(dateNowString) - millisecondsIn24Hours > fileName) {
         const filePath = path.join(__dirname, "../static/result/", fileName);
-        deleteDirectoryWithAllContents(filePath)
+        deleteDirectoryWithAllContents(filePath);
       }
-    })
+    });
   });
 
   // スクレイピングするアイテム
@@ -45,14 +45,19 @@ module.exports = async (inputItemcodes, res) => {
   // タイムスタンプのディレクトリを作成
   await fs.promises.mkdir(
     path.join(__dirname, "../", "static", `/result/${dateNowString}/goods/S`),
-    { recursive: true },
+    { recursive: true }
   );
   console.log("ディレクトリが作成されました");
 
   // 雛形CSVをコピーする
   await fs.promises.copyFile(
     path.join(__dirname, "../", `goods_img.csv`),
-    path.join(__dirname, "../", `static`, `/result/${dateNowString}/goods_img.csv`),
+    path.join(
+      __dirname,
+      "../",
+      `static`,
+      `/result/${dateNowString}/goods_img.csv`
+    )
   );
   console.log("ファイルをコピーしました");
 
@@ -70,7 +75,7 @@ module.exports = async (inputItemcodes, res) => {
       let pathList = stream.url.href.split("/");
       let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
 
-      console.log("ready", this.state)
+      console.log("ready", this.state);
 
       // 保存先ファイルのストリーム作成
       let write = fs.createWriteStream(
@@ -104,7 +109,7 @@ module.exports = async (inputItemcodes, res) => {
       console.log("ダウンロードが完了しました");
       // すべての画像のダウンロードが完了したらzip処理を実行する
       await zipFiles(dateNowString);
-    })
+    });
 
   // ④並列ダウンロード制限の設定
   client.download.parallel = 4;
@@ -125,33 +130,27 @@ module.exports = async (inputItemcodes, res) => {
         try {
           const result = await client.fetch(`${baseURL}${itemURL}/`);
           const { $ } = result;
-          
+
           const pageTitle = $("title").text();
           const targetThumb = $(".eye-catch img");
 
           resutItem.ATT_GRP_ID = itemURL;
           resutItem.url = `${baseURL}${itemURL}/`;
 
-          // サムネイルをダウンロードマネージャーに登録
-          targetThumb.first().download();
-
           try {
-            // サムネイル画像が見つからない場合
-            if (targetThumb.first().length === 0) {
-              resutItem.itemName = "Error!";
-              resutItem.itemCode = "Error!";
+            // サムネイル画像がある場合、ダウンロードマネージャーに登録
+            if (targetThumb.first().length > 0) {
+              targetThumb.first().download();
+            } else {
               resutItem.fileName = "Error!";
-              throw new Error(
-                "ページが存在しない、もしくはサムネイル画像の掲載がないページです。"
-              );
             }
 
-            const pathList = targetThumb
-              .first()
-              .attr("src")
-              .split("/");
+            const pathList = targetThumb.first().attr("src").split("/");
             const itemName = pageTitle.trim().split("|")[0];
-            const itemCode = $('[id^="post-"]').first().attr("id").replace("post-", "");
+            const itemCode = $('[id^="post-"]')
+              .first()
+              .attr("id")
+              .replace("post-", "");
             const fileName = pathList[pathList.length - 1];
 
             console.log(itemCode);
@@ -163,50 +162,61 @@ module.exports = async (inputItemcodes, res) => {
 
             // 取得情報を配列に追加
             resultItemAry.push(resutItem);
-
           } catch (err) {
-            console.log(err, "HTMLパースできませんでした。");
+            console.log(err, "データの取得に失敗しました。");
+            for (let key in resutItem) {
+              if (resutItem.hasOwnProperty(key) && resutItem[key] === "") {
+                resutItem[key] = "Error!";
+              }
+            }
             resutItem.isError = true;
             resultItemAry.push(resutItem);
           }
-
         } catch (err) {
           console.log(err, "fetchに失敗しました。");
           resutItem.ATT_GRP_ID = itemURL;
-          resutItem.itemName = "Error!";
-          resutItem.itemCode = "Error!";
-          resutItem.fileName = "Error!";
-          resutItem.url = `${baseURL}/${itemURL}/`;
+          resutItem.url = `${baseURL}${itemURL}/`;
+          for (let key in resutItem) {
+            if (resutItem.hasOwnProperty(key) && resutItem[key] === "") {
+              resutItem[key] = "Error!";
+            }
+          }
           resutItem.isError = true;
           resultItemAry.push(resutItem);
-        };
+        }
 
         if (resutItem.isError) {
           errorCount++;
-          console.log(errorCount, "エラー件数")
+          console.log(errorCount, "エラー件数");
         }
 
         await sleep(1000);
-
       })
     );
 
     console.log("finish", client.download.state);
-    console.log("すべてのアイテム取得完了")
+    console.log("すべてのアイテム取得完了");
 
     // CSVファイルに書き込み
     await csvWrite(csvPath, resultItemAry);
-
   };
 
   let exec = async () => {
     await getInfoData();
     if (resultItemAry.length > 0) {
       // 結果ページに遷移
-      res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
+      res.render("result", {
+        resultItemAry,
+        dateNowString,
+        itemLength,
+        imgCount,
+        errorCount,
+      });
     } else {
       // アイテムが取得できない場合、エラーページへ
-      res.render('errorpage', { message: '取得できるデータが１件もありませんでした。' });
+      res.render("errorpage", {
+        message: "取得できるデータが１件もありませんでした。",
+      });
     }
   };
 
