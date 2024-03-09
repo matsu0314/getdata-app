@@ -15,6 +15,8 @@ module.exports = async (inputItemcodes, res) => {
   const millisecondsIn24Hours = 86400000;
   // 全てのアイテム出力結果を格納（初期値）
   let resultItemAry = [];
+  // ダウロードするサムネイル要素を格納する配列
+  let thumbAry = []
   // カウント用変数
   let imgCount = 0;
   let errorCount = 0;
@@ -140,7 +142,7 @@ module.exports = async (inputItemcodes, res) => {
           try {
             // サムネイル画像がある場合、ダウンロードマネージャーに登録
             if (targetThumb.first().length > 0) {
-              targetThumb.first().download();
+              thumbAry.push(targetThumb);
             } else {
               resutItem.fileName = "Error!";
             }
@@ -199,6 +201,8 @@ module.exports = async (inputItemcodes, res) => {
 
     // CSVファイルに書き込み
     await csvWrite(csvPath, resultItemAry);
+    // サムネイルのダウンロードを開始
+    for (thumbElm of thumbAry) { thumbElm.first().download() }
   };
 
   let exec = async () => {
