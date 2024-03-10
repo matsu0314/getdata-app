@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const client = require("cheerio-httpcli");
 const zipFiles = require("./zipFiles");
+const downloadFile = require("./downloadFile");
 const csvWrite = require("./csv_shifJis");
 const deleteDirectoryWithAllContents = require("./deleteDirectory");
 const sleep = require("./sleep");
@@ -15,17 +16,13 @@ module.exports = async (inputItemcodes, res) => {
   const millisecondsIn24Hours = 86400000;
   // 全てのアイテム出力結果を格納（初期値）
   let resultItemAry = [];
-  // ダウロードするサムネイル要素を格納する配列
-  let thumbAry = []
   // カウント用変数
-  let imgCount = 0;
   let errorCount = 0;
 
   // キャッシュクリア
   console.log("キャッシュクリア");
   delete require.cache[require.resolve("./zipFiles")];
   delete require.cache[require.resolve("./csv_shifJis")];
-  client.download.clearCache();
 
   // 過去24時間前のダウンロードファイル削除
   console.log("過去24時間前のダウンロードファイル削除");
@@ -71,51 +68,24 @@ module.exports = async (inputItemcodes, res) => {
     `/result/${dateNowString}/goods_img.csv`
   );
 
-  // ダウンロードマネージャー
-  client.download
-    .on("ready", async function (stream) {
-      let pathList = stream.url.href.split("/");
-      let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
+  // サムネイルをダウンロード
+  const getThumbnail = async (url, dirName) => {
+    let pathList = url.split("/");
+    let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
+    const dest = path.join(
+      __dirname,
+      "../",
+      "static",
+      `/result/${dirName}/goods/S/${fileName}`
+    )
+    await downloadFile(url, dest)
+  }
+  getThumbnail().catch((err) => {
+    console.log(err, "サムネイルの取得に失敗しました。");
+    return "Error!";
+  }) 
 
-      console.log("ready", this.state);
-
-      // 保存先ファイルのストリーム作成
-      let write = fs.createWriteStream(
-        path.join(
-          __dirname,
-          "../",
-          "static",
-          `/result/${dateNowString}/goods/S/${fileName}`
-        )
-      );
-      write
-        .on("finish", function () {
-          console.log(stream.url.href + "をダウンロードしました");
-
-          imgCount++;
-        })
-        .on("error", console.error);
-      // ダウンロードストリームからデータを読み込んでファイルストリームに書き込む
-      stream
-        .on("data", function (chunk) {
-          write.write(chunk);
-        })
-        .on("end", function () {
-          write.end();
-        });
-    })
-    .on("error", function (err) {
-      console.error(err.url + "をダウンロードできませんでした: " + err.message);
-    })
-    .on("end", async function () {
-      console.log("ダウンロードが完了しました");
-      // すべての画像のダウンロードが完了したらzip処理を実行する
-      await zipFiles(dateNowString);
-    });
-
-  // ④並列ダウンロード制限の設定
-  client.download.parallel = 4;
-
+  
   const getInfoData = async () => {
     await Promise.all(
       itemURLAll.map(async (itemURL) => {
@@ -140,9 +110,9 @@ module.exports = async (inputItemcodes, res) => {
           resutItem.url = `${baseURL}${itemURL}/`;
 
           try {
-            // サムネイル画像がある場合、ダウンロードマネージャーに登録
+            // サムネイル画像がある場合
             if (targetThumb.first().length > 0) {
-              thumbAry.push(targetThumb);
+              resutItem.fileName = await getThumbnail(targetThumb.attr("src"), dateNowString)
             } else {
               resutItem.fileName = "Error!";
             }
@@ -154,8 +124,6 @@ module.exports = async (inputItemcodes, res) => {
               .attr("id")
               .replace("post-", "");
             const fileName = pathList[pathList.length - 1];
-
-            console.log(itemCode);
 
             // 商品情報取得
             resutItem.itemName = itemName;
@@ -191,18 +159,16 @@ module.exports = async (inputItemcodes, res) => {
           errorCount++;
           console.log(errorCount, "エラー件数");
         }
-
-        await sleep(1000);
+        // await sleep(1000);
       })
     );
 
-    console.log("finish", client.download.state);
     console.log("すべてのアイテム取得完了");
 
     // CSVファイルに書き込み
     await csvWrite(csvPath, resultItemAry);
-    // サムネイルのダウンロードを開始
-    for (thumbElm of thumbAry) { thumbElm.first().download() }
+    // すべての画像のダウンロードが完了したらzip処理を実行する
+    await zipFiles(dateNowString);
   };
 
   let exec = async () => {
@@ -213,7 +179,6 @@ module.exports = async (inputItemcodes, res) => {
         resultItemAry,
         dateNowString,
         itemLength,
-        imgCount,
         errorCount,
       });
     } else {
