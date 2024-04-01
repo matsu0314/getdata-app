@@ -6,7 +6,7 @@ const zipFiles = (dateNowString) => {
     return new Promise((resolve, reject) => {
 
         // 出力先のzipファイル名
-        var zip_file_name = "goods.zip";
+        var zip_file_name = "thumbnail.zip";
 
         // ストリームを生成して、archiverと紐付ける
         var archive = archiver.create('zip', {});

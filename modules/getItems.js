@@ -46,15 +46,15 @@ module.exports = async (inputItemcodes, res) => {
 
   // タイムスタンプのディレクトリを作成
   await fs.promises.mkdir(
-    path.join(__dirname, "../", "static", `/result/${dateNowString}/goods/S`),
+    path.join(__dirname, "../", "static", `/result/${dateNowString}/posts/`),
     { recursive: true },
   );
   console.log("ディレクトリが作成されました");
 
   // 雛形CSVをコピーする
   await fs.promises.copyFile(
-    path.join(__dirname, "../", `goods_img.csv`),
-    path.join(__dirname, "../", `static`, `/result/${dateNowString}/goods_img.csv`),
+    path.join(__dirname, "../", `posts_img.csv`),
+    path.join(__dirname, "../", `static`, `/result/${dateNowString}/posts_img.csv`),
   );
   console.log("ファイルをコピーしました");
 
@@ -63,7 +63,7 @@ module.exports = async (inputItemcodes, res) => {
     __dirname,
     "../",
     `static`,
-    `/result/${dateNowString}/goods_img.csv`
+    `/result/${dateNowString}/posts_img.csv`
   );
 
   const getInfoData = async () => {
