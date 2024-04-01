@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const client = require("cheerio-httpcli");
 const zipFiles = require("./zipFiles");
+const downloadFile = require("./downloadFile");
 const csvWrite = require("./csv_shifJis");
 const deleteDirectoryWithAllContents = require("./deleteDirectory");
 const sleep = require("./sleep");
@@ -15,17 +16,13 @@ module.exports = async (inputItemcodes, res) => {
   const millisecondsIn24Hours = 86400000;
   // 全てのアイテム出力結果を格納（初期値）
   let resultItemAry = [];
-  // １アイテム出力結果を格納（初期値）
-  let resultObj = {};
   // カウント用変数
-  let imgCount = 0;
   let errorCount = 0;
 
   // キャッシュクリア
   console.log("キャッシュクリア");
   delete require.cache[require.resolve("./zipFiles")];
   delete require.cache[require.resolve("./csv_shifJis")];
-  client.download.clearCache();
 
   // 過去24時間前のダウンロードファイル削除
   console.log("過去24時間前のダウンロードファイル削除");
@@ -34,9 +31,9 @@ module.exports = async (inputItemcodes, res) => {
     files.map((fileName) => {
       if (Number(dateNowString) - millisecondsIn24Hours > fileName) {
         const filePath = path.join(__dirname, "../static/result/", fileName);
-        deleteDirectoryWithAllContents(filePath)
+        deleteDirectoryWithAllContents(filePath);
       }
-    })
+    });
   });
 
   // スクレイピングするアイテム
@@ -66,11 +63,28 @@ module.exports = async (inputItemcodes, res) => {
     `/result/${dateNowString}/posts_img.csv`
   );
 
+  // サムネイルをダウンロード
+  const getThumbnail = async (url, dirName) => {
+    let pathList = url.split("/");
+    let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
+    const dest = path.join(
+      __dirname,
+      "../",
+      "static",
+      `/result/${dirName}/goods/S/${fileName}`
+    )
+    await downloadFile(url, dest)
+  }
+  getThumbnail().catch((err) => {
+    console.log(err, "サムネイルの取得に失敗しました。");
+    return "Error!";
+  }) 
+
+  
   const getInfoData = async () => {
     await Promise.all(
       itemURLAll.map(async (itemURL) => {
         // 初期化
-        resultObj = {};
         let resutItem = {
           ATT_GRP_ID: "",
           itemName: "",
@@ -83,143 +97,93 @@ module.exports = async (inputItemcodes, res) => {
         try {
           const result = await client.fetch(`${baseURL}${itemURL}/`);
           const { $ } = result;
-          
+
           const pageTitle = $("title").text();
           const targetThumb = $(".eye-catch img");
 
           resutItem.ATT_GRP_ID = itemURL;
           resutItem.url = `${baseURL}${itemURL}/`;
 
-          // サムネイルをダウンロードマネージャーに登録
-          targetThumb.first().download();
-
           try {
-            // サムネイル画像が見つからない場合
-            if (targetThumb.first().length === 0) {
-              resutItem.itemName = "Error!";
-              resutItem.itemCode = "Error!";
+            // サムネイル画像がある場合
+            if (targetThumb.first().length > 0) {
+              resutItem.fileName = await getThumbnail(targetThumb.attr("src"), dateNowString)
+            } else {
               resutItem.fileName = "Error!";
-              throw new Error(
-                "ページが存在しない、もしくはサムネイル画像の掲載がないページです。"
-              );
             }
 
-            const pathList = targetThumb
-              .first()
-              .attr("src")
-              .split("/");
+            const pathList = targetThumb.first().attr("src").split("/");
             const itemName = pageTitle.trim().split("|")[0];
-            const itemCode = $('[id^="post-"]').first().attr("id").replace("post-", "");
+            const itemCode = $('[id^="post-"]')
+              .first()
+              .attr("id")
+              .replace("post-", "");
             const fileName = pathList[pathList.length - 1];
-
-            console.log(itemCode);
 
             // 商品情報取得
             resutItem.itemName = itemName;
             resutItem.itemCode = itemCode;
             resutItem.fileName = fileName;
 
-            // 取得情報をオブジェクトに格納
-            resultObj = { itemCode, fileName };
             // 取得情報を配列に追加
             resultItemAry.push(resutItem);
-
           } catch (err) {
-            console.log(err, "HTMLパースできませんでした。");
+            console.log(err, "データの取得に失敗しました。");
+            for (let key in resutItem) {
+              if (resutItem.hasOwnProperty(key) && resutItem[key] === "") {
+                resutItem[key] = "Error!";
+              }
+            }
             resutItem.isError = true;
             resultItemAry.push(resutItem);
           }
-
         } catch (err) {
           console.log(err, "fetchに失敗しました。");
           resutItem.ATT_GRP_ID = itemURL;
-          resutItem.itemName = "Error!";
-          resutItem.itemCode = "Error!";
-          resutItem.fileName = "Error!";
-          resutItem.url = `${baseURL}/${itemURL}/`;
+          resutItem.url = `${baseURL}${itemURL}/`;
+          for (let key in resutItem) {
+            if (resutItem.hasOwnProperty(key) && resutItem[key] === "") {
+              resutItem[key] = "Error!";
+            }
+          }
           resutItem.isError = true;
           resultItemAry.push(resutItem);
-        };
+        }
 
         if (resutItem.isError) {
           errorCount++;
-          console.log(errorCount, "エラー件数")
+          console.log(errorCount, "エラー件数");
         }
-
-        await sleep(1000);
-
+        // await sleep(1000);
       })
     );
 
-    console.log("finish", client.download.state);
-    console.log("すべてのアイテム取得完了")
+    console.log("すべてのアイテム取得完了");
 
     // CSVファイルに書き込み
     await csvWrite(csvPath, resultItemAry);
-
-    // 結果ページに遷移
-    res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
+    // すべての画像のダウンロードが完了したらzip処理を実行する
+    await zipFiles(dateNowString);
   };
 
   let exec = async () => {
     await getInfoData();
     if (resultItemAry.length > 0) {
       // 結果ページに遷移
-      res.render("result", { resultItemAry, dateNowString, itemLength, imgCount, errorCount });
+      res.render("result", {
+        resultItemAry,
+        dateNowString,
+        itemLength,
+        errorCount,
+      });
     } else {
       // アイテムが取得できない場合、エラーページへ
-      res.render('errorpage', { message: '取得できるデータが１件もありませんでした。' });
+      res.render("errorpage", {
+        message: "取得できるデータが１件もありませんでした。",
+      });
     }
   };
 
   // データ取得を開始
-  (async () => {
-    await exec();
-  })();
-
-
-  // ダウンロードマネージャー
-  client.download
-    .on("ready", async function (stream) {
-      let pathList = stream.url.href.split("/");
-      let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
-
-      console.log("ready", this.state)
-
-      // 保存先ファイルのストリーム作成
-      let write = fs.createWriteStream(
-        path.join(
-          __dirname,
-          "../",
-          "static",
-          `/result/${dateNowString}/goods/S/${fileName}`
-        )
-      );
-      write
-        .on("finish", function () {
-          console.log(stream.url.href + "をダウンロードしました");
-
-          imgCount++;
-        })
-        .on("error", console.error);
-      // ダウンロードストリームからデータを読み込んでファイルストリームに書き込む
-      stream
-        .on("data", function (chunk) {
-          write.write(chunk);
-        })
-        .on("end", function () {
-          write.end();
-        });
-    })
-    .on("error", function (err) {
-      console.error(err.url + "をダウンロードできませんでした: " + err.message);
-    })
-    .on("end", async function () {
-      console.log("ダウンロードが完了しました");
-      // すべての画像のダウンロードが完了したらzip処理を実行する
-      await zipFiles(dateNowString);
-    })
-
-  // ④並列ダウンロード制限の設定
-  client.download.parallel = 4;
+  await exec();
 };
