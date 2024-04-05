@@ -71,7 +71,7 @@ module.exports = async (inputItemcodes, res) => {
       __dirname,
       "../",
       "static",
-      `/result/${dirName}/goods/S/${fileName}`
+      `/result/${dirName}/posts/${fileName}`
     )
     await downloadFile(url, dest)
   }
@@ -79,7 +79,6 @@ module.exports = async (inputItemcodes, res) => {
     console.log(err, "サムネイルの取得に失敗しました。");
     return "Error!";
   }) 
-
   
   const getInfoData = async () => {
     await Promise.all(
@@ -107,6 +106,7 @@ module.exports = async (inputItemcodes, res) => {
           try {
             // サムネイル画像がある場合
             if (targetThumb.first().length > 0) {
+              console.log(targetThumb.attr("src"))
               resutItem.fileName = await getThumbnail(targetThumb.attr("src"), dateNowString)
             } else {
               resutItem.fileName = "Error!";
