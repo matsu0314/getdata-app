@@ -5,7 +5,7 @@ const fs = require("fs");
 const client = require("cheerio-httpcli");
 const zipFiles = require("./zipFiles");
 const downloadFile = require("./downloadFile");
-const csvWrite = require("./csv_shifJis");
+const csvWrite = require("./csv_shiftJis");
 const deleteDirectoryWithAllContents = require("./deleteDirectory");
 const sleep = require("./sleep");
 
@@ -22,7 +22,7 @@ module.exports = async (inputItemcodes, res) => {
   // キャッシュクリア
   console.log("キャッシュクリア");
   delete require.cache[require.resolve("./zipFiles")];
-  delete require.cache[require.resolve("./csv_shifJis")];
+  delete require.cache[require.resolve("./csv_shiftJis")];
 
   // 過去24時間前のダウンロードファイル削除
   console.log("過去24時間前のダウンロードファイル削除");
@@ -79,12 +79,12 @@ module.exports = async (inputItemcodes, res) => {
     console.log(err, "サムネイルの取得に失敗しました。");
     return "Error!";
   }) 
-  
+
   const getInfoData = async () => {
     await Promise.all(
       itemURLAll.map(async (itemURL) => {
         // 初期化
-        let resutItem = {
+        let resultItem = {
           ATT_GRP_ID: "",
           itemName: "",
           itemCode: "",
@@ -100,16 +100,16 @@ module.exports = async (inputItemcodes, res) => {
           const pageTitle = $("title").text();
           const targetThumb = $(".eye-catch img");
 
-          resutItem.ATT_GRP_ID = itemURL;
-          resutItem.url = `${baseURL}${itemURL}/`;
+          resultItem.ATT_GRP_ID = itemURL;
+          resultItem.url = `${baseURL}${itemURL}/`;
 
           try {
             // サムネイル画像がある場合
             if (targetThumb.first().length > 0) {
               console.log(targetThumb.attr("src"))
-              resutItem.fileName = await getThumbnail(targetThumb.attr("src"), dateNowString)
+              resultItem.fileName = await getThumbnail(targetThumb.attr("src"), dateNowString)
             } else {
-              resutItem.fileName = "Error!";
+              resultItem.fileName = "Error!";
             }
 
             const pathList = targetThumb.first().attr("src").split("/");
@@ -121,36 +121,36 @@ module.exports = async (inputItemcodes, res) => {
             const fileName = pathList[pathList.length - 1];
 
             // 商品情報取得
-            resutItem.itemName = itemName;
-            resutItem.itemCode = itemCode;
-            resutItem.fileName = fileName;
+            resultItem.itemName = itemName;
+            resultItem.itemCode = itemCode;
+            resultItem.fileName = fileName;
 
             // 取得情報を配列に追加
-            resultItemAry.push(resutItem);
+            resultItemAry.push(resultItem);
           } catch (err) {
             console.log(err, "データの取得に失敗しました。");
-            for (let key in resutItem) {
-              if (resutItem.hasOwnProperty(key) && resutItem[key] === "") {
-                resutItem[key] = "Error!";
+            for (let key in resultItem) {
+              if (resultItem.hasOwnProperty(key) && resultItem[key] === "") {
+                resultItem[key] = "Error!";
               }
             }
-            resutItem.isError = true;
-            resultItemAry.push(resutItem);
+            resultItem.isError = true;
+            resultItemAry.push(resultItem);
           }
         } catch (err) {
           console.log(err, "fetchに失敗しました。");
-          resutItem.ATT_GRP_ID = itemURL;
-          resutItem.url = `${baseURL}${itemURL}/`;
-          for (let key in resutItem) {
-            if (resutItem.hasOwnProperty(key) && resutItem[key] === "") {
-              resutItem[key] = "Error!";
+          resultItem.ATT_GRP_ID = itemURL;
+          resultItem.url = `${baseURL}${itemURL}/`;
+          for (let key in resultItem) {
+            if (resultItem.hasOwnProperty(key) && resultItem[key] === "") {
+              resultItem[key] = "Error!";
             }
           }
-          resutItem.isError = true;
-          resultItemAry.push(resutItem);
+          resultItem.isError = true;
+          resultItemAry.push(resultItem);
         }
 
-        if (resutItem.isError) {
+        if (resultItem.isError) {
           errorCount++;
           console.log(errorCount, "エラー件数");
         }
