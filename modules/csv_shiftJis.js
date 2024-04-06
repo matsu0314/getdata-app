@@ -1,7 +1,7 @@
 const fs = require('fs');
 const iconv = require('iconv-lite');
 const csv = require('csv');
-const read_csv_shiftjis = require('./readCsvShiftjis');
+// const read_csv_shiftjis = require('./readCsvShiftjis');
 
   const write_csv_shiftjis = (path, data) => {
     return new Promise(async (resolve, reject) => {
@@ -10,7 +10,7 @@ const read_csv_shiftjis = require('./readCsvShiftjis');
           csv.stringify(array, (err, output) => {
             if (err) {
               console.log('エラーが発生しました。' + err);
-              resutItem.errMessage.push("CSVの書き込みでエラーが発生しました。");
+              resultItem.errMessage.push("CSVの書き込みでエラーが発生しました。");
               reject(err);
               return;
             }
@@ -25,7 +25,7 @@ const read_csv_shiftjis = require('./readCsvShiftjis');
         fs.writeFile(path, iconv.encode(_csv_data, 'shift_jis'), {flag: "w"},  err => {
           if (err) {
             console.log('エラーが発生しました。' + err);
-            resutItem.errMessage.push(err);
+            resultItem.errMessage.push(err);
             reject(err);
             return;
           }
