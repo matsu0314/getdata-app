@@ -9,7 +9,7 @@ const csvWrite = require("./csv_shiftJis");
 const deleteDirectoryWithAllContents = require("./deleteDirectory");
 const sleep = require("./sleep");
 
-module.exports = async (inputItemcodes, res) => {
+module.exports = async (inputpostIds, res) => {
   // 現在時刻（タイムタンプ）を取得
   const dateNowString = Date.now();
   // 24時間のミリ秒数
@@ -28,16 +28,16 @@ module.exports = async (inputItemcodes, res) => {
   console.log("過去24時間前のダウンロードファイル削除");
   fs.readdir(path.join(__dirname, "../static/result/"), (e, files) => {
     console.log("resultディレクトに残っているファイル", files);
-    files.map((fileName) => {
-      if (Number(dateNowString) - millisecondsIn24Hours > fileName) {
-        const filePath = path.join(__dirname, "../static/result/", fileName);
+    files.map((thumbName) => {
+      if (Number(dateNowString) - millisecondsIn24Hours > thumbName) {
+        const filePath = path.join(__dirname, "../static/result/", thumbName);
         deleteDirectoryWithAllContents(filePath);
       }
     });
   });
 
   // スクレイピングするアイテム
-  const itemURLAll = await inputItemcodes.trim().replace(/,$/g, "").split(",");
+  const itemURLAll = await inputpostIds.trim().replace(/,$/g, "").split(",");
   const itemLength = itemURLAll.length;
   const baseURL = "https://m-kenomemo.com/";
 
@@ -50,8 +50,8 @@ module.exports = async (inputItemcodes, res) => {
 
   // 雛形CSVをコピーする
   await fs.promises.copyFile(
-    path.join(__dirname, "../", `posts_img.csv`),
-    path.join(__dirname, "../", `static`, `/result/${dateNowString}/posts_img.csv`),
+    path.join(__dirname, "../", `posts_info.csv`),
+    path.join(__dirname, "../", `static`, `/result/${dateNowString}/posts_info.csv`),
   );
   console.log("ファイルをコピーしました");
 
@@ -60,18 +60,18 @@ module.exports = async (inputItemcodes, res) => {
     __dirname,
     "../",
     `static`,
-    `/result/${dateNowString}/posts_img.csv`
+    `/result/${dateNowString}/posts_info.csv`
   );
 
   // サムネイルをダウンロード
   const getThumbnail = async (url, dirName) => {
     let pathList = url.split("/");
-    let fileName = pathList[pathList.length - 1].replace(/\?.*/, "");
+    let thumbName = pathList[pathList.length - 1].replace(/\?.*/, "");
     const dest = path.join(
       __dirname,
       "../",
       "static",
-      `/result/${dirName}/posts/${fileName}`
+      `/result/${dirName}/posts/${thumbName}`
     )
     await downloadFile(url, dest)
   }
@@ -85,10 +85,10 @@ module.exports = async (inputItemcodes, res) => {
       itemURLAll.map(async (itemURL) => {
         // 初期化
         let resultItem = {
-          ATT_GRP_ID: "",
-          itemName: "",
-          itemCode: "",
-          fileName: "",
+          slug: "",
+          postTitle: "",
+          postId: "",
+          thumbName: "",
           url: "",
           isError: false,
         };
@@ -100,30 +100,29 @@ module.exports = async (inputItemcodes, res) => {
           const pageTitle = $("title").text();
           const targetThumb = $(".eye-catch img");
 
-          resultItem.ATT_GRP_ID = itemURL;
+          resultItem.slug = itemURL;
           resultItem.url = `${baseURL}${itemURL}/`;
 
           try {
             // サムネイル画像がある場合
             if (targetThumb.first().length > 0) {
-              console.log(targetThumb.attr("src"))
-              resultItem.fileName = await getThumbnail(targetThumb.attr("src"), dateNowString)
+              resultItem.thumbName = await getThumbnail(targetThumb.attr("src"), dateNowString)
             } else {
-              resultItem.fileName = "Error!";
+              resultItem.thumbName = "Error!";
             }
 
             const pathList = targetThumb.first().attr("src").split("/");
-            const itemName = pageTitle.trim().split("|")[0];
-            const itemCode = $('[id^="post-"]')
+            const postTitle = pageTitle.trim().split("|")[0];
+            const postId = $('[id^="post-"]')
               .first()
               .attr("id")
               .replace("post-", "");
-            const fileName = pathList[pathList.length - 1];
+            const thumbName = pathList[pathList.length - 1];
 
             // 商品情報取得
-            resultItem.itemName = itemName;
-            resultItem.itemCode = itemCode;
-            resultItem.fileName = fileName;
+            resultItem.postTitle = postTitle;
+            resultItem.postId = postId;
+            resultItem.thumbName = thumbName;
 
             // 取得情報を配列に追加
             resultItemAry.push(resultItem);
@@ -139,7 +138,7 @@ module.exports = async (inputItemcodes, res) => {
           }
         } catch (err) {
           console.log(err, "fetchに失敗しました。");
-          resultItem.ATT_GRP_ID = itemURL;
+          resultItem.slug = itemURL;
           resultItem.url = `${baseURL}${itemURL}/`;
           for (let key in resultItem) {
             if (resultItem.hasOwnProperty(key) && resultItem[key] === "") {
