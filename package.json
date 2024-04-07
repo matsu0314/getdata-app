@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tailwindcss": "npx tailwindcss ./input.css -o ./public/stylesheets/output.css --watch"
+    "tailwindcss": "npx tailwindcss ./input.css -o ./static/stylesheets/output.css --watch"
   },
   "keywords": [],
   "author": "",

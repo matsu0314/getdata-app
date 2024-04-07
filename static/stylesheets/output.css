@@ -2425,6 +2425,11 @@ html.dark{
   background-color: rgb(59 113 202 / var(--tw-bg-opacity));
 }
 
+.bg-\[\#3f91b3\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(63 145 179 / var(--tw-bg-opacity));
+}
+
 .bg-\[\#6d6d6d\]{
   --tw-bg-opacity: 1;
   background-color: rgb(109 109 109 / var(--tw-bg-opacity));
@@ -2474,11 +2479,6 @@ html.dark{
 .bg-gray-50{
   --tw-bg-opacity: 1;
   background-color: rgb(249 250 251 / var(--tw-bg-opacity));
-}
-
-.bg-green-600{
-  --tw-bg-opacity: 1;
-  background-color: rgb(22 163 74 / var(--tw-bg-opacity));
 }
 
 .bg-inherit{
