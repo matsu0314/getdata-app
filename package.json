@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon ./dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tailwindcss": "npx tailwindcss ./input.css -o ./static/stylesheets/output.css --watch"
   },
@@ -12,6 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/archiver": "^6.0.2",
+    "@types/iconv": "^3.0.4",
     "archiver": "^6.0.1",
     "body-parser": "^1.20.2",
     "cheerio": "^1.0.0-rc.12",
@@ -26,6 +28,10 @@
     "tw-elements": "^1.1.0"
   },
   "devDependencies": {
+    "@types/cheerio": "^0.22.35",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^20.12.5",
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.33",
     "postcss-cli": "^11.0.0",

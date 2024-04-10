@@ -1,6 +1,6 @@
-const fs = require("fs");
+import fs from "fs";
 
-const downloadFile = async function download(url, dest) {
+const downloadFile = async function download(url:string, dest:string) {
   const res = await fetch(url)
   const buffer = await res.arrayBuffer()
   await fs.promises.writeFile(dest, Buffer.from(buffer))
@@ -15,4 +15,4 @@ const downloadFile = async function download(url, dest) {
 
 // main().catch(console.error)
 
-module.exports = downloadFile;
+export default downloadFile;

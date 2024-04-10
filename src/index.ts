@@ -1,11 +1,12 @@
-const path = require('path');
-const morgan = require('morgan');
-const express = require('express');
-const bodyParser = require('body-parser');
+import express from 'express';
+import morgan from 'morgan';
+import bodyParser from 'body-parser';
+import  path from 'path';
 
-const routers = require('./routes');
+import routers from './routes';
 
 const app = express();
+
 
 app.use(express.static("public"));
 app.use(express.static("node_modules"));

@@ -1,16 +1,24 @@
-const fs = require("fs");
-const iconv = require("iconv-lite");
-const csv = require("csv");
+import fs from "fs";
+import iconv from "iconv-lite";
+import csv from "csv";
 // const read_csv_shiftjis = require('./readCsvShiftjis');
 
-const write_csv_shiftjis = (path, data) => {
-  return new Promise(async (resolve, reject) => {
-    const data_to_csv = (array) => {
-      return new Promise((resolve, reject) => {
+type ResultItem = {
+  slug: string;
+  postTitle: string;
+  postId: string;
+  thumbName: string;
+  url: string;
+  isError: boolean;
+}
+
+const write_csv_shiftjis = (path:string, data:string[][]) => {
+  return new Promise<void>(async (resolve, reject) => {
+    const data_to_csv = (array:string[][]) => {
+      return new Promise<string>((resolve, reject) => {
         csv.stringify(array, (err, output) => {
           if (err) {
             console.log("エラーが発生しました。" + err);
-            resultItem.errMessage.push("CSVの書き込みでエラーが発生しました。");
             reject(err);
             return;
           }
@@ -29,7 +37,6 @@ const write_csv_shiftjis = (path, data) => {
         (err) => {
           if (err) {
             console.log("エラーが発生しました。" + err);
-            resultItem.errMessage.push(err);
             reject(err);
             return;
           }
@@ -42,7 +49,7 @@ const write_csv_shiftjis = (path, data) => {
   });
 };
 
-const csvWrite = async (csvPath, resultObjAry) => {
+const csvWrite = async (csvPath:string, resultObjAry:ResultItem[] ) => {
   const resultAry = [["スラッグ", "タイトル", "記事ID", "サムネイル", "URL"]];
 
   await Promise.all(
@@ -56,4 +63,4 @@ const csvWrite = async (csvPath, resultObjAry) => {
   await write_csv_shiftjis(csvPath, resultAry);
 };
 
-module.exports = csvWrite;
+export default csvWrite;

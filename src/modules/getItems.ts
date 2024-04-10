@@ -1,21 +1,31 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-const path = require("path");
-const fs = require("fs");
-const client = require("cheerio-httpcli");
-const zipFiles = require("./zipFiles");
-const downloadFile = require("./downloadFile");
-const csvWrite = require("./csv_shiftJis");
-const deleteDirectoryWithAllContents = require("./deleteDirectory");
-const sleep = require("./sleep");
+import { Request, Response, NextFunction } from "express";
+import path from "path";
+import fs from "fs";
+import client from "cheerio-httpcli";
+import zipFiles from "./zipFiles";
+import downloadFile from "./downloadFile";
+import csvWrite from "./csv_shiftJis";
+import deleteDirectoryWithAllContents from "./deleteDirectory";
+import sleep from "./sleep";
 
-module.exports = async (inputpostIds, res) => {
+type ResultItem = {
+  slug: string;
+  postTitle: string;
+  postId: string;
+  thumbName: string;
+  url: string;
+  isError: boolean;
+};
+
+const getItems = async (inputpostIds: string, res: Response) => {
   // 現在時刻（タイムタンプ）を取得
-  const dateNowString = Date.now();
+  const dateNowString = String(Date.now());
   // 24時間のミリ秒数
   const millisecondsIn24Hours = 86400000;
   // 全てのアイテム出力結果を格納（初期値）
-  let resultItemAry = [];
+  let resultItemAry: ResultItem[] = [];
   // カウント用変数
   let errorCount = 0;
 
@@ -29,7 +39,7 @@ module.exports = async (inputpostIds, res) => {
   fs.readdir(path.join(__dirname, "../static/result/"), (e, files) => {
     console.log("resultディレクトに残っているファイル", files);
     files.map((thumbName) => {
-      if (Number(dateNowString) - millisecondsIn24Hours > thumbName) {
+      if (Number(dateNowString) - millisecondsIn24Hours > Number(thumbName)) {
         const filePath = path.join(__dirname, "../static/result/", thumbName);
         deleteDirectoryWithAllContents(filePath);
       }
@@ -37,21 +47,26 @@ module.exports = async (inputpostIds, res) => {
   });
 
   // スクレイピングするアイテム
-  const itemURLAll = await inputpostIds.trim().replace(/,$/g, "").split(",");
+  const itemURLAll = inputpostIds.trim().replace(/,$/g, "").split(",");
   const itemLength = itemURLAll.length;
   const baseURL = "https://m-kenomemo.com/";
 
   // タイムスタンプのディレクトリを作成
   await fs.promises.mkdir(
     path.join(__dirname, "../", "static", `/result/${dateNowString}/posts/`),
-    { recursive: true },
+    { recursive: true }
   );
   console.log("ディレクトリが作成されました");
 
   // 雛形CSVをコピーする
   await fs.promises.copyFile(
     path.join(__dirname, "../", `posts_info.csv`),
-    path.join(__dirname, "../", `static`, `/result/${dateNowString}/posts_info.csv`),
+    path.join(
+      __dirname,
+      "../",
+      `static`,
+      `/result/${dateNowString}/posts_info.csv`
+    )
   );
   console.log("ファイルをコピーしました");
 
@@ -64,21 +79,22 @@ module.exports = async (inputpostIds, res) => {
   );
 
   // サムネイルをダウンロード
-  const getThumbnail = async (url, dirName) => {
-    let pathList = url.split("/");
-    let thumbName = pathList[pathList.length - 1].replace(/\?.*/, "");
-    const dest = path.join(
-      __dirname,
-      "../",
-      "static",
-      `/result/${dirName}/posts/${thumbName}`
-    )
-    await downloadFile(url, dest)
-  }
-  getThumbnail().catch((err) => {
-    console.log(err, "サムネイルの取得に失敗しました。");
-    return "Error!";
-  }) 
+  const getThumbnail = async (url: string, dirName: string) => {
+    try {
+      let pathList = url.split("/");
+      let thumbName = pathList[pathList.length - 1].replace(/\?.*/, "");
+      const dest = path.join(
+        __dirname,
+        "../",
+        "static",
+        `/result/${dirName}/posts/${thumbName}`
+      );
+      downloadFile(url, dest);
+    } catch (err: any) {
+      console.log(err, "サムネイルの取得に失敗しました。");
+      return "Error!";
+    }
+  };
 
   const getInfoData = async () => {
     await Promise.all(
@@ -99,27 +115,34 @@ module.exports = async (inputpostIds, res) => {
 
           const pageTitle = $("title").text();
           const targetThumb = $(".eye-catch img");
+          let pathList = [];
+          let postTitle = "";
+          let postId = "";
+          let thumbName = "";
 
           resultItem.slug = itemURL;
           resultItem.url = `${baseURL}${itemURL}/`;
 
           try {
-            // サムネイル画像がある場合
+            // サムネイル情報取得
             if (targetThumb.first().length > 0) {
-              resultItem.thumbName = await getThumbnail(targetThumb.attr("src"), dateNowString)
+              resultItem.thumbName = targetThumb.attr("src") ?? "";
+              pathList = resultItem.thumbName.split("/");
+              thumbName = pathList[pathList.length - 1];
+
+              await getThumbnail(resultItem.thumbName, dateNowString);
             } else {
               resultItem.thumbName = "Error!";
             }
+            // タイトル取得
+            postTitle = pageTitle.trim().split("|")[0];
+            // 記事ID取得
+            const postElement = $('[id^="post-"]').first();
+            if (postElement && postElement.length > 0) {
+              postId = postElement.attr("id")?.replace("post-", "") ?? "";
+            }
 
-            const pathList = targetThumb.first().attr("src").split("/");
-            const postTitle = pageTitle.trim().split("|")[0];
-            const postId = $('[id^="post-"]')
-              .first()
-              .attr("id")
-              .replace("post-", "");
-            const thumbName = pathList[pathList.length - 1];
-
-            // 商品情報取得
+            // 商品情報をオブジェクトに格納
             resultItem.postTitle = postTitle;
             resultItem.postId = postId;
             resultItem.thumbName = thumbName;
@@ -130,7 +153,7 @@ module.exports = async (inputpostIds, res) => {
             console.log(err, "データの取得に失敗しました。");
             for (let key in resultItem) {
               if (resultItem.hasOwnProperty(key) && resultItem[key] === "") {
-                resultItem[key] = "Error!";
+                resultItem[objKey] = "Error!";
               }
             }
             resultItem.isError = true;
@@ -186,3 +209,5 @@ module.exports = async (inputpostIds, res) => {
   // データ取得を開始
   await exec();
 };
+
+export default getItems;

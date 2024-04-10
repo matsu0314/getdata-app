@@ -1,6 +1,6 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const deleteDirectoryWithAllContents = async (path) => {
+const deleteDirectoryWithAllContents = async (path:string) => {
   // ファイルの存在チェック
   if (fs.existsSync(path)) {
     // ファイル（ディレクトリ）を再帰的に削除する
@@ -10,4 +10,4 @@ const deleteDirectoryWithAllContents = async (path) => {
   }
 };
 
-module.exports = deleteDirectoryWithAllContents;
+export default deleteDirectoryWithAllContents;

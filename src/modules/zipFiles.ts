@@ -1,8 +1,8 @@
-const archiver = require('archiver');
-const fs = require('fs');
-const path = require('path');
+import archiver from 'archiver';
+import fs from 'fs';
+import path from 'path';
 
-const zipFiles = (dateNowString) => {
+const zipFiles = (dateNowString: string) => {
     return new Promise((resolve, reject) => {
 
         // 出力先のzipファイル名
@@ -40,4 +40,4 @@ const zipFiles = (dateNowString) => {
     })
 }
 
-module.exports = zipFiles;
+export default zipFiles;
