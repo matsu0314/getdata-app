@@ -15,12 +15,12 @@ app.use(morgan('combined'));
 // フォームの値を解析する
 app.use(bodyParser.urlencoded({ extended: false }));
 // 静的フォルダを設定する
-app.use('/static', express.static(path.join(__dirname, 'static')));
+app.use('/static', express.static(path.join(__dirname, '../static')));
 
 // ejsテンプレートエンジンを設定
 app.set('view engine', 'ejs');
 // viewsディレクトリの名称変更
-app.set('views', path.join(__dirname, 'templates'));
+app.set('views', path.join(__dirname, '../src/templates'));
 
 app.use(routers);
 

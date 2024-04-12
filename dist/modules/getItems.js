@@ -26,11 +26,11 @@ const getItems = async (inputpostIds, res) => {
     delete require.cache[require.resolve("./csv_shiftJis")];
     // 過去24時間前のダウンロードファイル削除
     console.log("過去24時間前のダウンロードファイル削除");
-    fs_1.default.readdir(path_1.default.join(__dirname, "../static/result/"), (e, files) => {
+    fs_1.default.readdir(path_1.default.join(__dirname, "../../static/result/"), (e, files) => {
         console.log("resultディレクトに残っているファイル", files);
         files.map((thumbName) => {
             if (Number(dateNowString) - millisecondsIn24Hours > Number(thumbName)) {
-                const filePath = path_1.default.join(__dirname, "../static/result/", thumbName);
+                const filePath = path_1.default.join(__dirname, "../../static/result/", thumbName);
                 (0, deleteDirectory_1.default)(filePath);
             }
         });
@@ -40,19 +40,19 @@ const getItems = async (inputpostIds, res) => {
     const itemLength = itemURLAll.length;
     const baseURL = "https://m-kenomemo.com/";
     // タイムスタンプのディレクトリを作成
-    await fs_1.default.promises.mkdir(path_1.default.join(__dirname, "../", "static", `/result/${dateNowString}/posts/`), { recursive: true });
+    await fs_1.default.promises.mkdir(path_1.default.join(__dirname, "../../", "static", `/result/${dateNowString}/posts/`), { recursive: true });
     console.log("ディレクトリが作成されました");
     // 雛形CSVをコピーする
-    await fs_1.default.promises.copyFile(path_1.default.join(__dirname, "../", `posts_info.csv`), path_1.default.join(__dirname, "../", `static`, `/result/${dateNowString}/posts_info.csv`));
+    await fs_1.default.promises.copyFile(path_1.default.join(__dirname, "../../", `posts_info.csv`), path_1.default.join(__dirname, "../../", `static`, `/result/${dateNowString}/posts_info.csv`));
     console.log("ファイルをコピーしました");
     // CSVのディレクトリパス
-    const csvPath = path_1.default.join(__dirname, "../", `static`, `/result/${dateNowString}/posts_info.csv`);
+    const csvPath = path_1.default.join(__dirname, "../../", `static`, `/result/${dateNowString}/posts_info.csv`);
     // サムネイルをダウンロード
     const getThumbnail = async (url, dirName) => {
         try {
             let pathList = url.split("/");
             let thumbName = pathList[pathList.length - 1].replace(/\?.*/, "");
-            const dest = path_1.default.join(__dirname, "../", "static", `/result/${dirName}/posts/${thumbName}`);
+            const dest = path_1.default.join(__dirname, "../../", "static", `/result/${dirName}/posts/${thumbName}`);
             (0, downloadFile_1.default)(url, dest);
         }
         catch (err) {
@@ -62,7 +62,6 @@ const getItems = async (inputpostIds, res) => {
     };
     const getInfoData = async () => {
         await Promise.all(itemURLAll.map(async (itemURL) => {
-            var _a, _b, _c;
             // 初期化
             let resultItem = {
                 slug: "",
@@ -86,7 +85,7 @@ const getItems = async (inputpostIds, res) => {
                 try {
                     // サムネイル情報取得
                     if (targetThumb.first().length > 0) {
-                        resultItem.thumbName = (_a = targetThumb.attr("src")) !== null && _a !== void 0 ? _a : "";
+                        resultItem.thumbName = targetThumb.attr("src") ?? "";
                         pathList = resultItem.thumbName.split("/");
                         thumbName = pathList[pathList.length - 1];
                         await getThumbnail(resultItem.thumbName, dateNowString);
@@ -99,7 +98,7 @@ const getItems = async (inputpostIds, res) => {
                     // 記事ID取得
                     const postElement = $('[id^="post-"]').first();
                     if (postElement && postElement.length > 0) {
-                        postId = (_c = (_b = postElement.attr("id")) === null || _b === void 0 ? void 0 : _b.replace("post-", "")) !== null && _c !== void 0 ? _c : "";
+                        postId = postElement.attr("id")?.replace("post-", "") ?? "";
                     }
                     // 商品情報をオブジェクトに格納
                     resultItem.postTitle = postTitle;
@@ -110,25 +109,27 @@ const getItems = async (inputpostIds, res) => {
                 }
                 catch (err) {
                     console.log(err, "データの取得に失敗しました。");
-                    for (let key in resultItem) {
-                        if (resultItem.hasOwnProperty(key) && resultItem[key] === "") {
-                            resultItem[key] = "Error!";
-                        }
-                    }
+                    // resultItemのプロパティに値がなかったら文字列"Error!"を格納
+                    resultItem.slug = itemURL;
+                    resultItem.url = `${baseURL}${itemURL}/`;
+                    resultItem.postTitle = resultItem.postTitle || "Error!";
+                    resultItem.postId = resultItem.postId || "Error!";
+                    resultItem.thumbName = resultItem.thumbName || "Error!";
                     resultItem.isError = true;
+                    // resultItemを配列に追加
                     resultItemAry.push(resultItem);
                 }
             }
             catch (err) {
                 console.log(err, "fetchに失敗しました。");
+                // resultItemのプロパティに値がなかったら文字列"Error!"を格納
                 resultItem.slug = itemURL;
                 resultItem.url = `${baseURL}${itemURL}/`;
-                for (let key in resultItem) {
-                    if (resultItem.hasOwnProperty(key) && resultItem[key] === "") {
-                        resultItem[key] = "Error!";
-                    }
-                }
+                resultItem.postTitle = resultItem.postTitle || "Error!";
+                resultItem.postId = resultItem.postId || "Error!";
+                resultItem.thumbName = resultItem.thumbName || "Error!";
                 resultItem.isError = true;
+                // resultItemを配列に追加
                 resultItemAry.push(resultItem);
             }
             if (resultItem.isError) {

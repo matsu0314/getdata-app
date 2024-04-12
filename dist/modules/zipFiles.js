@@ -8,30 +8,26 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const zipFiles = (dateNowString) => {
     return new Promise((resolve, reject) => {
-        // 出力先のzipファイル名
         var zip_file_name = "thumbnail.zip";
-        // ストリームを生成して、archiverと紐付ける
-        var archive = archiver_1.default.create('zip', {});
-        var output = fs_1.default.createWriteStream(path_1.default.join(__dirname, "../", 'static', `/result/${dateNowString}/` + zip_file_name));
-        archive.pipe(output);
-        // 圧縮対象のファイル及びフォルダ
-        archive.glob("**/*.jpg", { cwd: path_1.default.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        archive.glob("**/*.jpeg", { cwd: path_1.default.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        archive.glob("**/*.png", { cwd: path_1.default.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        archive.glob("**/*.gif", { cwd: path_1.default.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        archive.glob("**/*.weps", { cwd: path_1.default.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        // zip圧縮実行
-        archive.finalize();
-        // finalize() の完了を待つため、finalize() のコールバック内で resolve() を呼び出す
-        archive.on('finish', () => {
+        var targetDir = path_1.default.join(__dirname, `../../static/result/${dateNowString}/`);
+        var archive = archiver_1.default.create("zip", {
+            zlib: { level: 9 },
+        });
+        var output = fs_1.default.createWriteStream(path_1.default.join(targetDir, zip_file_name));
+        output.on("error", (err) => {
+            reject(err);
+        });
+        output.on("close", () => {
             var archive_size = archive.pointer();
             console.log(`complete! total size : ${archive_size} bytes`);
             resolve(archive_size);
         });
-        // エラーハンドリング
-        archive.on('error', (err) => {
+        archive.on("error", (err) => {
             reject(err);
         });
+        archive.glob("**", { cwd: path_1.default.join(targetDir, "posts/") });
+        archive.pipe(output);
+        archive.finalize();
     });
 };
 exports.default = zipFiles;

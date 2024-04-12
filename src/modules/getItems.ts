@@ -36,11 +36,15 @@ const getItems = async (inputpostIds: string, res: Response) => {
 
   // 過去24時間前のダウンロードファイル削除
   console.log("過去24時間前のダウンロードファイル削除");
-  fs.readdir(path.join(__dirname, "../static/result/"), (e, files) => {
+  fs.readdir(path.join(__dirname, "../../static/result/"), (e, files) => {
     console.log("resultディレクトに残っているファイル", files);
     files.map((thumbName) => {
       if (Number(dateNowString) - millisecondsIn24Hours > Number(thumbName)) {
-        const filePath = path.join(__dirname, "../static/result/", thumbName);
+        const filePath = path.join(
+          __dirname,
+          "../../static/result/",
+          thumbName
+        );
         deleteDirectoryWithAllContents(filePath);
       }
     });
@@ -53,17 +57,17 @@ const getItems = async (inputpostIds: string, res: Response) => {
 
   // タイムスタンプのディレクトリを作成
   await fs.promises.mkdir(
-    path.join(__dirname, "../", "static", `/result/${dateNowString}/posts/`),
+    path.join(__dirname, "../../", "static", `/result/${dateNowString}/posts/`),
     { recursive: true }
   );
   console.log("ディレクトリが作成されました");
 
   // 雛形CSVをコピーする
   await fs.promises.copyFile(
-    path.join(__dirname, "../", `posts_info.csv`),
+    path.join(__dirname, "../../", `posts_info.csv`),
     path.join(
       __dirname,
-      "../",
+      "../../",
       `static`,
       `/result/${dateNowString}/posts_info.csv`
     )
@@ -73,7 +77,7 @@ const getItems = async (inputpostIds: string, res: Response) => {
   // CSVのディレクトリパス
   const csvPath = path.join(
     __dirname,
-    "../",
+    "../../",
     `static`,
     `/result/${dateNowString}/posts_info.csv`
   );
@@ -85,7 +89,7 @@ const getItems = async (inputpostIds: string, res: Response) => {
       let thumbName = pathList[pathList.length - 1].replace(/\?.*/, "");
       const dest = path.join(
         __dirname,
-        "../",
+        "../../",
         "static",
         `/result/${dirName}/posts/${thumbName}`
       );
@@ -151,24 +155,29 @@ const getItems = async (inputpostIds: string, res: Response) => {
             resultItemAry.push(resultItem);
           } catch (err) {
             console.log(err, "データの取得に失敗しました。");
-            for (let key in resultItem) {
-              if (resultItem.hasOwnProperty(key) && resultItem[key] === "") {
-                resultItem[objKey] = "Error!";
-              }
-            }
-            resultItem.isError = true;
-            resultItemAry.push(resultItem);
+
+          // resultItemのプロパティに値がなかったら文字列"Error!"を格納
+          resultItem.slug = itemURL;
+          resultItem.url = `${baseURL}${itemURL}/`;
+          resultItem.postTitle = resultItem.postTitle || "Error!";
+          resultItem.postId = resultItem.postId || "Error!";
+          resultItem.thumbName = resultItem.thumbName || "Error!";
+          resultItem.isError = true;
+
+          // resultItemを配列に追加
+          resultItemAry.push(resultItem);
           }
         } catch (err) {
           console.log(err, "fetchに失敗しました。");
+          // resultItemのプロパティに値がなかったら文字列"Error!"を格納
           resultItem.slug = itemURL;
           resultItem.url = `${baseURL}${itemURL}/`;
-          for (let key in resultItem) {
-            if (resultItem.hasOwnProperty(key) && resultItem[key] === "") {
-              resultItem[key] = "Error!";
-            }
-          }
+          resultItem.postTitle = resultItem.postTitle || "Error!";
+          resultItem.postId = resultItem.postId || "Error!";
+          resultItem.thumbName = resultItem.thumbName || "Error!";
           resultItem.isError = true;
+
+          // resultItemを配列に追加
           resultItemAry.push(resultItem);
         }
 
@@ -185,6 +194,7 @@ const getItems = async (inputpostIds: string, res: Response) => {
     // CSVファイルに書き込み
     await csvWrite(csvPath, resultItemAry);
     // すべての画像のダウンロードが完了したらzip処理を実行する
+
     await zipFiles(dateNowString);
   };
 

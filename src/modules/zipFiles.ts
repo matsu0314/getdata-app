@@ -1,43 +1,39 @@
-import archiver from 'archiver';
-import fs from 'fs';
-import path from 'path';
+import archiver from "archiver";
+import fs from "fs";
+import path from "path";
+import { promisify } from "util";
 
 const zipFiles = (dateNowString: string) => {
-    return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
+    var zip_file_name = "thumbnail.zip";
+    var targetDir = path.join(
+      __dirname,
+      `../../static/result/${dateNowString}/`
+    );
 
-        // 出力先のzipファイル名
-        var zip_file_name = "thumbnail.zip";
+    var archive = archiver.create("zip", {
+      zlib: { level: 9 },
+    });
+    var output = fs.createWriteStream(path.join(targetDir, zip_file_name));
 
-        // ストリームを生成して、archiverと紐付ける
-        var archive = archiver.create('zip', {});
-        var output =  fs.createWriteStream(path.join(__dirname, "../", 'static', `/result/${dateNowString}/` + zip_file_name));
+    output.on("error", (err) => {
+      reject(err);
+    });
 
-        archive.pipe(output);
+    output.on("close", () => {
+      var archive_size = archive.pointer();
+      console.log(`complete! total size : ${archive_size} bytes`);
+      resolve(archive_size);
+    });
 
+    archive.on("error", (err) => {
+      reject(err);
+    });
 
-        // 圧縮対象のファイル及びフォルダ
-        archive.glob("**/*.jpg", { cwd: path.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        archive.glob("**/*.jpeg", { cwd: path.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        archive.glob("**/*.png", { cwd: path.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        archive.glob("**/*.gif", { cwd: path.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-        archive.glob("**/*.weps", { cwd: path.join(__dirname, "../", 'static', `/result/${dateNowString}/`) });
-
-        // zip圧縮実行
-        archive.finalize();
-
-        // finalize() の完了を待つため、finalize() のコールバック内で resolve() を呼び出す
-        archive.on('finish', () => {
-            var archive_size = archive.pointer();
-            console.log(`complete! total size : ${archive_size} bytes`);
-            resolve(archive_size);
-        });
-
-        // エラーハンドリング
-        archive.on('error', (err) => {
-            reject(err);
-        });
-
-    })
-}
+    archive.glob("**", { cwd: path.join(targetDir, "posts/") });
+    archive.pipe(output);
+    archive.finalize();
+  });
+};
 
 export default zipFiles;
