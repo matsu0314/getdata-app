@@ -89,3 +89,6 @@ build/Release
 
 # storybookのサンプル除外
 /src/stories
+
+# debugファイル
+launch.json

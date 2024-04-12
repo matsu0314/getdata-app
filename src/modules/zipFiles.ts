@@ -1,7 +1,6 @@
 import archiver from "archiver";
 import fs from "fs";
 import path from "path";
-import { promisify } from "util";
 
 const zipFiles = (dateNowString: string) => {
   return new Promise((resolve, reject) => {
