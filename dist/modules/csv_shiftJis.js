@@ -40,8 +40,10 @@ const write_csv_shiftjis = (path, data) => {
 const csvWrite = async (csvPath, resultObjAry) => {
     const resultAry = [["スラッグ", "タイトル", "記事ID", "サムネイル", "URL"]];
     await Promise.all(resultObjAry.map(async (resultObj) => {
-        const { slug, postTitle, postId, thumbName, url } = resultObj;
-        resultAry.push([slug, postTitle, postId, thumbName, url]);
+        const { slug, postTitle, postId, thumbName, url, isError } = resultObj;
+        if (!isError) {
+            resultAry.push([slug, postTitle, postId, thumbName, url]);
+        }
     }));
     await write_csv_shiftjis(csvPath, resultAry);
 };
