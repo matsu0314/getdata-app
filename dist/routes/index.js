@@ -18,3 +18,4 @@ router.get("/result", (req, res) => {
     res.render("result");
 });
 exports.default = router;
+//# sourceMappingURL=index.js.map

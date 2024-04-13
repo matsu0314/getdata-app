@@ -17,17 +17,18 @@ const zipFiles = (dateNowString) => {
         output.on("error", (err) => {
             reject(err);
         });
-        output.on("close", () => {
-            var archive_size = archive.pointer();
-            console.log(`complete! total size : ${archive_size} bytes`);
-            resolve(archive_size);
-        });
         archive.on("error", (err) => {
             reject(err);
         });
         archive.glob("**", { cwd: path_1.default.join(targetDir, "posts/") });
         archive.pipe(output);
+        output.on("close", () => {
+            var archive_size = archive.pointer();
+            console.log(`complete! total size : ${archive_size} bytes`);
+            resolve(archive_size);
+        });
         archive.finalize();
     });
 };
 exports.default = zipFiles;
+//# sourceMappingURL=zipFiles.js.map

@@ -8,3 +8,4 @@ const sleep = (time) => {
     });
 };
 exports.default = sleep;
+//# sourceMappingURL=sleep.js.map

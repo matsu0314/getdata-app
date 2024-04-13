@@ -92,3 +92,5 @@ build/Release
 
 # debugファイル
 launch.json
+*.map
+

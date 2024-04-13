@@ -93,7 +93,7 @@ const getItems = async (inputpostIds: string, res: Response) => {
         "static",
         `/result/${dirName}/posts/${thumbName}`
       );
-      downloadFile(url, dest);
+      await downloadFile(url, dest);
     } catch (err: any) {
       console.log(err, "サムネイルの取得に失敗しました。");
       return "Error!";

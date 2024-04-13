@@ -53,7 +53,7 @@ const getItems = async (inputpostIds, res) => {
             let pathList = url.split("/");
             let thumbName = pathList[pathList.length - 1].replace(/\?.*/, "");
             const dest = path_1.default.join(__dirname, "../../", "static", `/result/${dirName}/posts/${thumbName}`);
-            (0, downloadFile_1.default)(url, dest);
+            await (0, downloadFile_1.default)(url, dest);
         }
         catch (err) {
             console.log(err, "サムネイルの取得に失敗しました。");
@@ -166,3 +166,4 @@ const getItems = async (inputpostIds, res) => {
     await exec();
 };
 exports.default = getItems;
+//# sourceMappingURL=getItems.js.map

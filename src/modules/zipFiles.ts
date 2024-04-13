@@ -19,18 +19,19 @@ const zipFiles = (dateNowString: string) => {
       reject(err);
     });
 
-    output.on("close", () => {
-      var archive_size = archive.pointer();
-      console.log(`complete! total size : ${archive_size} bytes`);
-      resolve(archive_size);
-    });
-
     archive.on("error", (err) => {
       reject(err);
     });
 
     archive.glob("**", { cwd: path.join(targetDir, "posts/") });
     archive.pipe(output);
+
+    output.on("close", () => {
+      var archive_size = archive.pointer();
+      console.log(`complete! total size : ${archive_size} bytes`);
+      resolve(archive_size);
+    });
+    
     archive.finalize();
   });
 };

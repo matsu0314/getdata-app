@@ -16,3 +16,4 @@ const downloadFile = async function download(url, dest) {
 // }
 // main().catch(console.error)
 exports.default = downloadFile;
+//# sourceMappingURL=downloadFile.js.map
