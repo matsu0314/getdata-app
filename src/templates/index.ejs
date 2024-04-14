@@ -4,16 +4,38 @@
     <%- include("./head", {title: "トップ"}); %>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
   </head>
   <body class="flex flex-col">
     <%- include("./header") %>
     <main class="container mx-auto p-1 md:p-1">
       <div>
-        <p>ブログ情報のCSVとサムネイル画像を取得します。取得する記事のスラッグをカンマ区切りで入力してください。</p>
-        <div class="form-area mt-4"><%- include("./form", {inputItemcodes: ""}) %></div>
+        <p>
+          スクレイピングでブログ情報を抽出したCSVとサムネイル画像を取得します。<br>取得したい記事のスラッグを、カンマで区切って入力してください。
+        </p>
+        <p class="mt-2">
+          入力例）<span id="copy-text"
+            >express-axios,node-express-ejs,react-context,show-more-class</span
+          ><span id="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="#035c8c" d="M28 10v18H10V10zm0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2"/><path fill="#035c8c" d="M4 18H2V4a2 2 0 0 1 2-2h14v2H4Z"/></svg></span>
+        </p>
+        <div class="form-area mt-4">
+          <%- include("./form", {inputItemcodes: ""}) %>
+        </div>
       </div>
     </main>
+    <script>
+      // クリップボードへコピー
+      const copyButton = document.getElementById("copy-button");
+      copyButton.addEventListener("click", () => {
+        const targetText = document.getElementById("copy-text").textContent;
+        copyToClipboard(targetText);
+      });
+
+      function copyToClipboard(tagValue) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(tagValue)
+        }
+      }
+    </script>
     <%- include("./footer") %>
   </body>
 </html>
