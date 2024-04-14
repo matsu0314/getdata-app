@@ -54,9 +54,10 @@ const csvWrite = async (csvPath:string, resultObjAry:ResultItem[] ) => {
 
   await Promise.all(
     resultObjAry.map(async (resultObj) => {
-      const { slug, postTitle, postId, thumbName, url } = resultObj;
-
-      resultAry.push([slug, postTitle, postId, thumbName, url]);
+      const { slug, postTitle, postId, thumbName, url, isError } = resultObj;
+      if(!isError) {
+        resultAry.push([slug, postTitle, postId, thumbName, url]);
+      }
     })
   );
 
