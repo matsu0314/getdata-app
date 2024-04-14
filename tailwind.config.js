@@ -2,8 +2,10 @@
 module.exports = {
   content: [
     "./src/**/*.{html,js}",
+    "./dist/**/*.{html,js}",
+    "./dist/templates/**/*.ejs",
+    "./src/templates/**/*.ejs",
     "./static/**/*.{html,js}",
-    "./templates/**/*.ejs",
     "./node_modules/tw-elements/dist/js/**/*.js"
   ],
   theme: {
