@@ -7,8 +7,9 @@
     <%- include("./header") %>
     <main class="container mx-auto p-1 md:p-1">
       <div>
-      <p class="py-5 text-lg font-medium">取得したアイテムは<%= itemLength %>件<% if (errorCount > 0) { %>（内エラー<%= errorCount %>件）<% } %>です。</p>
-      <p class="flex items-center">サムネイルzipファイルダウンロード<a href="/static/result/<%= dateNowString %>/thumbnail.zip"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#8795b0" d="M2 6a2 2 0 0 1 2-2h5a1 1 0 0 1 .707.293L11.414 6H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm6.586 0H4v12h16V8h-9a1 1 0 0 1-.707-.293zM12 9.5a1 1 0 0 1 1 1v2.586l.293-.293a1 1 0 0 1 1.414 1.414l-2 2a1 1 0 0 1-1.414 0l-2-2a1 1 0 1 1 1.414-1.414l.293.293V10.5a1 1 0 0 1 1-1"/></svg></a></p>
+      <p class="py-1">スクレイピング対象の記事は<%= itemLength %>件です。</p>
+      <p class="text-lg font-medium">データ取得に成功した記事は<%= itemLength - errorCount %>件、<% if(errorCount === 0){%> 失敗した記事はありませんでした。 <% } else { %><span class="text-red-600">失敗した記事が<%= errorCount %>件ありました。</span><% }  %></p>
+      <p class="mt-5 flex items-center">サムネイルzipファイルダウンロード<a href="/static/result/<%= dateNowString %>/thumbnail.zip"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#8795b0" d="M2 6a2 2 0 0 1 2-2h5a1 1 0 0 1 .707.293L11.414 6H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm6.586 0H4v12h16V8h-9a1 1 0 0 1-.707-.293zM12 9.5a1 1 0 0 1 1 1v2.586l.293-.293a1 1 0 0 1 1.414 1.414l-2 2a1 1 0 0 1-1.414 0l-2-2a1 1 0 1 1 1.414-1.414l.293.293V10.5a1 1 0 0 1 1-1"/></svg></a></p>
       <p class="flex items-center">posts_info.csvファイルダウンロード<a href="/static/result/<%= dateNowString %>/posts_info.csv"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#8795b0" d="M4 4a2 2 0 0 1 2-2h8a1 1 0 0 1 .707.293l5 5A1 1 0 0 1 20 8v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm13.586 4L14 4.414V8zM12 4H6v16h12V10h-5a1 1 0 0 1-1-1zm0 7.5a1 1 0 0 1 1 1v2.586l.293-.293a1 1 0 0 1 1.414 1.414l-2 2a1 1 0 0 1-1.414 0l-2-2a1 1 0 1 1 1.414-1.414l.293.293V12.5a1 1 0 0 1 1-1"/></svg></a></p>
       <p class="mt-5 text-sm text-gray-500 text-right">※表示はデータ取得順になります。</p>
       <table class="w-full border-collapse border border-slate-400">
