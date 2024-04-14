@@ -874,6 +874,10 @@ html.dark{
   top: 100%;
 }
 
+.-top-12{
+  top: -3rem;
+}
+
 .\!z-40{
   z-index: 40 !important;
 }
@@ -3110,6 +3114,11 @@ html.dark{
   color: rgb(0 0 0 / 64);
 }
 
+.text-blue-700{
+  --tw-text-opacity: 1;
+  color: rgb(29 78 216 / var(--tw-text-opacity));
+}
+
 .text-current{
   color: currentColor;
 }
@@ -3207,6 +3216,11 @@ html.dark{
 .text-primary-700{
   --tw-text-opacity: 1;
   color: rgb(40 81 146 / var(--tw-text-opacity));
+}
+
+.text-red-600{
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity));
 }
 
 .text-secondary{
@@ -3532,6 +3546,10 @@ body {
   font-style: normal;
 }
 
+main {
+  height: 100%;
+}
+
 main a {
   color: #8ab4f8;
   text-decoration: underline;
@@ -3543,6 +3561,17 @@ main a:hover {
 
 main tr.error-true {
   background:#ffe8e8;
+}
+
+main #copy-button svg {
+  display: inline;
+  padding-left: 4px;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+main #copy-button:hover {
+  cursor: copy;
 }
 
 .selection\:bg-transparent *::-moz-selection{
@@ -3571,6 +3600,16 @@ main tr.error-true {
   position: absolute;
 }
 
+.before\:left-1\/2::before{
+  content: var(--tw-content);
+  left: 50%;
+}
+
+.before\:top-full::before{
+  content: var(--tw-content);
+  top: 100%;
+}
+
 .before\:h-\[0\.875rem\]::before{
   content: var(--tw-content);
   height: 0.875rem;
@@ -3579,6 +3618,12 @@ main tr.error-true {
 .before\:w-\[0\.875rem\]::before{
   content: var(--tw-content);
   width: 0.875rem;
+}
+
+.before\:-translate-x-1\/2::before{
+  content: var(--tw-content);
+  --tw-translate-x: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .before\:scale-0::before{
@@ -3591,6 +3636,22 @@ main tr.error-true {
 .before\:rounded-full::before{
   content: var(--tw-content);
   border-radius: 9999px;
+}
+
+.before\:border-4::before{
+  content: var(--tw-content);
+  border-width: 4px;
+}
+
+.before\:border-transparent::before{
+  content: var(--tw-content);
+  border-color: transparent;
+}
+
+.before\:border-t-black::before{
+  content: var(--tw-content);
+  --tw-border-opacity: 1;
+  border-top-color: rgb(0 0 0 / var(--tw-border-opacity));
 }
 
 .before\:bg-transparent::before{

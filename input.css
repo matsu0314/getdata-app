@@ -24,6 +24,10 @@ body {
   font-weight: 400;
   font-style: normal;
 }
+
+main {
+  height: 100%;
+}
 main a {
   color: #8ab4f8;
   text-decoration: underline;
@@ -35,4 +39,13 @@ main a:hover {
 
 main tr.error-true {
   background:#ffe8e8;
+}
+main #copy-button svg {
+  display: inline;
+  padding-left: 4px;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+main #copy-button:hover {
+  cursor: copy;
 }
