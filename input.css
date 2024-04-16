@@ -40,12 +40,7 @@ main a:hover {
 main tr.error-true {
   background:#ffe8e8;
 }
-main #copy-button svg {
-  display: inline;
-  padding-left: 4px;
-  width: 1.5rem;
-  height: 1.5rem;
-}
+
 main #copy-button:hover {
-  cursor: copy;
+  cursor: pointer;
 }

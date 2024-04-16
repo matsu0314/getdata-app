@@ -15,7 +15,14 @@
         <p class="mt-2">
           入力例）<span id="copy-text"
             >express-axios,node-express-ejs,react-context,show-more-class</span
-          ><span id="copy-button"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="#035c8c" d="M28 10v18H10V10zm0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2"/><path fill="#035c8c" d="M4 18H2V4a2 2 0 0 1 2-2h14v2H4Z"/></svg></span>
+          ><button
+          type="button"
+          data-twe-ripple-init
+          data-twe-ripple-color="light"
+          id="copy-button"
+          class="inline-block rounded bg-primary px-2 pb-1 pt-1 ml-1 text-xs font-medium uppercase leading-normal text-white shadow-primary-3 transition duration-150 ease-in-out hover:bg-primary-accent-300 hover:shadow-primary-2 focus:bg-primary-accent-300 focus:shadow-primary-2 focus:outline-none focus:ring-0 active:bg-primary-600 active:shadow-primary-2 motion-reduce:transition-none dark:shadow-black/30 dark:hover:shadow-dark-strong dark:focus:shadow-dark-strong dark:active:shadow-dark-strong">
+          COPY
+        </button>
         </p>
         <div class="form-area mt-4">
           <%- include("./form", {inputItemcodes: ""}) %>
@@ -32,7 +39,12 @@
 
       function copyToClipboard(tagValue) {
         if (navigator.clipboard) {
-          navigator.clipboard.writeText(tagValue)
+          navigator.clipboard.writeText(tagValue);
+          copyButton.textContent="COPIED!";
+
+          setTimeout(() => {
+            copyButton.textContent="COPY";
+          },500)
         }
       }
     </script>

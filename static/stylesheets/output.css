@@ -874,10 +874,6 @@ html.dark{
   top: 100%;
 }
 
-.-top-12{
-  top: -3rem;
-}
-
 .\!z-40{
   z-index: 40 !important;
 }
@@ -2772,6 +2768,10 @@ html.dark{
   padding-bottom: 0px;
 }
 
+.pb-1{
+  padding-bottom: 0.25rem;
+}
+
 .pb-2{
   padding-bottom: 0.5rem;
 }
@@ -2810,6 +2810,10 @@ html.dark{
 
 .pr-\[24px\]{
   padding-right: 24px;
+}
+
+.pt-1{
+  padding-top: 0.25rem;
 }
 
 .pt-2{
@@ -3563,15 +3567,8 @@ main tr.error-true {
   background:#ffe8e8;
 }
 
-main #copy-button svg {
-  display: inline;
-  padding-left: 4px;
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
 main #copy-button:hover {
-  cursor: copy;
+  cursor: pointer;
 }
 
 .selection\:bg-transparent *::-moz-selection{
@@ -3600,16 +3597,6 @@ main #copy-button:hover {
   position: absolute;
 }
 
-.before\:left-1\/2::before{
-  content: var(--tw-content);
-  left: 50%;
-}
-
-.before\:top-full::before{
-  content: var(--tw-content);
-  top: 100%;
-}
-
 .before\:h-\[0\.875rem\]::before{
   content: var(--tw-content);
   height: 0.875rem;
@@ -3618,12 +3605,6 @@ main #copy-button:hover {
 .before\:w-\[0\.875rem\]::before{
   content: var(--tw-content);
   width: 0.875rem;
-}
-
-.before\:-translate-x-1\/2::before{
-  content: var(--tw-content);
-  --tw-translate-x: -50%;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .before\:scale-0::before{
@@ -3636,22 +3617,6 @@ main #copy-button:hover {
 .before\:rounded-full::before{
   content: var(--tw-content);
   border-radius: 9999px;
-}
-
-.before\:border-4::before{
-  content: var(--tw-content);
-  border-width: 4px;
-}
-
-.before\:border-transparent::before{
-  content: var(--tw-content);
-  border-color: transparent;
-}
-
-.before\:border-t-black::before{
-  content: var(--tw-content);
-  --tw-border-opacity: 1;
-  border-top-color: rgb(0 0 0 / var(--tw-border-opacity));
 }
 
 .before\:bg-transparent::before{
@@ -4234,6 +4199,11 @@ main #copy-button:hover {
 .active\:bg-\[\#cacfd1\]:active{
   --tw-bg-opacity: 1;
   background-color: rgb(202 207 209 / var(--tw-bg-opacity));
+}
+
+.active\:bg-primary-600:active{
+  --tw-bg-opacity: 1;
+  background-color: rgb(48 97 175 / var(--tw-bg-opacity));
 }
 
 .active\:bg-primary-700:active{
@@ -5023,6 +4993,11 @@ main #copy-button:hover {
   --tw-shadow: 0 4px 9px -4px rgba(59,113,202,0.5);
   --tw-shadow-colored: 0 4px 9px -4px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+:is(.dark .dark\:shadow-black\/30){
+  --tw-shadow-color: rgb(0 0 0 / 0.3);
+  --tw-shadow: var(--tw-shadow-colored);
 }
 
 :is(.dark .dark\:placeholder\:text-gray-200)::-moz-placeholder{
